@@ -9,19 +9,9 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Coupon, DiscountType } from './entities/coupon.entity';
+import { CreateCouponDto, UpdateCouponDto } from './dto/create-coupon.dto';
 
-export class CreateCouponDto {
-  code: string;
-  description?: string;
-  discountType: DiscountType;
-  discountValue: number;
-  minimumOrderValue?: number;
-  maximumDiscount?: number;
-  validFrom?: Date;
-  validUntil?: Date;
-  usageLimit?: number;
-  isActive?: boolean;
-}
+export { CreateCouponDto, UpdateCouponDto };
 
 @Injectable()
 export class CouponsService {
@@ -118,7 +108,7 @@ export class CouponsService {
   }
 
   // Atualiza um cupom existente
-  async update(id: string, updateDto: Partial<CreateCouponDto>): Promise<Coupon> {
+  async update(id: string, updateDto: UpdateCouponDto): Promise<Coupon> {
     await this.findOne(id); // Verifica se existe
     await this.couponsRepository.update(id, updateDto);
     return this.findOne(id);

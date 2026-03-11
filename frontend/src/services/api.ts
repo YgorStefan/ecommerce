@@ -188,6 +188,9 @@ export const ordersService = {
   // [Admin] Atualiza o status de um pedido
   updateStatus: (id: string, status: string) =>
     api.patch(`/orders/${id}/status`, { status }),
+
+  // [Admin] Estatísticas de vendas (receita total, mensal e total de pedidos)
+  getStats: () => api.get('/orders/stats'),
 };
 
 // Serviço de avaliações

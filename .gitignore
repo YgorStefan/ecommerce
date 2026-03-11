@@ -12,6 +12,8 @@ backend/dist/
 # Variáveis de ambiente — NUNCA commitar o .env real
 .env
 **/.env
+**/.env.local
+**/.env.*.local
 
 # Logs
 *.log
