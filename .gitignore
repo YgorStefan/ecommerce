@@ -1,0 +1,42 @@
+# Dependências
+node_modules/
+**/node_modules/
+
+# Build do Next.js
+frontend/.next/
+frontend/out/
+
+# Build do NestJS
+backend/dist/
+
+# Variáveis de ambiente — NUNCA commitar o .env real
+.env
+**/.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Uploads de imagens
+backend/uploads/
+
+# Docker volumes locais
+postgres_data/
+
+# TypeScript
+*.tsbuildinfo
+
+# Cache
+.eslintcache
