@@ -11,13 +11,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Review } from './entities/review.entity';
 import { Product } from '../products/entities/product.entity';
+import { CreateReviewDto } from './dto/create-review.dto';
 
-export class CreateReviewDto {
-  productId: string;
-  rating: number;
-  title?: string;
-  comment?: string;
-}
+export { CreateReviewDto };
 
 @Injectable()
 export class ReviewsService {

@@ -51,13 +51,11 @@ function MetricCard({
 }
 
 export default function AdminDashboardPage() {
-  // Busca as estatísticas de vendas em paralelo
+  // Busca as estatísticas de vendas do endpoint dedicado
   const { data: salesStats } = useQuery({
     queryKey: ['admin-sales-stats'],
-    queryFn: async () => {
-      const response = await ordersService.getAll({ page: 1, limit: 1 });
-      return response.data.data;
-    },
+    queryFn: () => ordersService.getStats(),
+    select: (res) => res.data.data as { totalRevenue: number; totalOrders: number; monthlyRevenue: number },
   });
 
   const { data: ordersData } = useQuery({
@@ -118,11 +116,11 @@ export default function AdminDashboardPage() {
           description="No catálogo"
           icon={Package}
         />
-        {/* Receita (placeholder — em produção viria de endpoint dedicado) */}
+        {/* Receita total obtida do endpoint de estatísticas */}
         <MetricCard
           title="Receita Total"
-          value="Ver pedidos"
-          description="Acesse o relatório"
+          value={salesStats ? formatCurrency(salesStats.totalRevenue) : 'R$ 0,00'}
+          description={salesStats ? `R$ ${formatCurrency(salesStats.monthlyRevenue)} nos últimos 30 dias` : 'Carregando...'}
           icon={DollarSign}
         />
       </div>

@@ -2,8 +2,6 @@
 # Modo DESENVOLVIMENTO — monta o código local para hot-reload
 # Uso: docker-compose -f docker-compose.dev.yml up
 
-version: '3.9'
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -50,6 +48,7 @@ services:
     restart: unless-stopped
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - INTERNAL_API_URL=http://backend:3001
     ports:
       - '3000:3000'
     depends_on:

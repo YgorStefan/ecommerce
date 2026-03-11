@@ -7,6 +7,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
   // Cria a instância da aplicação NestJS
@@ -23,6 +24,9 @@ async function bootstrap() {
     origin: configService.get<string>('FRONTEND_URL', 'http://localhost:3000'),
     credentials: true, // Permite o envio de cookies e headers de autenticação
   });
+
+  // Registra o interceptor global que padroniza o formato de todas as respostas
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   // Configura o pipe de validação global para todos os DTOs
   app.useGlobalPipes(

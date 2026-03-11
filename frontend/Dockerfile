@@ -1,16 +1,25 @@
-# Dockerfile do Frontend Next.js — estágio único (mais simples e confiável)
+# Dockerfile do Frontend Next.js
+# Build multi-stage: instala dependências e compila, depois copia apenas o necessário
 
-FROM node:20-alpine
+# ==================== STAGE 1: DEPENDÊNCIAS ====================
+FROM node:20-alpine AS deps
 
 WORKDIR /app
 
-# Copia os arquivos de dependências
 COPY package*.json ./
 
-# Instala todas as dependências (incluindo devDependencies necessárias para o build)
-RUN npm install
+# Instala todas as dependências (devDeps são necessárias para o build do Next.js)
+RUN npm ci
 
-# Copia todo o código fonte
+# ==================== STAGE 2: BUILD ====================
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copia as dependências instaladas no stage anterior
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copia o código fonte
 COPY . .
 
 # Desabilita telemetria do Next.js
@@ -19,12 +28,21 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Executa o build de produção do Next.js
 RUN npm run build
 
-# Variáveis de ambiente de produção
+# ==================== STAGE 3: PRODUÇÃO ====================
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
+# Copia apenas os artefatos necessários para rodar em produção
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
 EXPOSE 3000
 
-# Chama o Next.js diretamente pelo Node — evita problema de PATH no Alpine
-CMD ["node", "node_modules/next/dist/bin/next", "start"]
+CMD ["node", "server.js"]

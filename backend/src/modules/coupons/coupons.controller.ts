@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { CouponsService, CreateCouponDto } from './coupons.service';
+import { CouponsService, CreateCouponDto, UpdateCouponDto } from './coupons.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -62,7 +62,7 @@ export class CouponsController {
   @ApiOperation({ summary: '[Admin] Atualizar cupom' })
   update(
     @Param('id') id: string,
-    @Body() updateDto: Partial<CreateCouponDto>,
+    @Body() updateDto: UpdateCouponDto,
   ) {
     return this.couponsService.update(id, updateDto);
   }

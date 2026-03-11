@@ -28,7 +28,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instala apenas as dependências de produção (menor tamanho)
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Copia o código compilado do stage de build
 COPY --from=builder /app/dist ./dist

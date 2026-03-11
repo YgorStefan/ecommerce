@@ -61,6 +61,15 @@ export class OrdersController {
 
   // ================== ROTAS ADMINISTRATIVAS ==================
 
+  // GET /api/orders/stats — estatísticas de vendas (admin)
+  @Get('stats')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: '[Admin] Estatísticas de vendas' })
+  getSalesStats() {
+    return this.ordersService.getSalesStats();
+  }
+
   // GET /api/orders — lista todos os pedidos (admin)
   @Get()
   @UseGuards(RolesGuard)

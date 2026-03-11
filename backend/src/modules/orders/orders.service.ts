@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Order, OrderStatus, PaymentStatus } from './entities/order.entity';
+import { Order, OrderStatus, PaymentMethod, PaymentStatus } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { CartService } from '../cart/cart.service';
 import { CouponsService } from '../coupons/coupons.service';
@@ -64,6 +64,12 @@ export class OrdersService {
       );
       couponId = coupon.id;
       discountAmount = await this.couponsService.calculateDiscount(coupon, subtotal);
+    }
+
+    // Aplica desconto de 5% para pagamento via PIX
+    if (createOrderDto.paymentMethod === PaymentMethod.PIX) {
+      const pixDiscount = Math.round(subtotal * 0.05 * 100) / 100;
+      discountAmount = Math.round((discountAmount + pixDiscount) * 100) / 100;
     }
 
     // Calcula o frete (simulado — em produção integraria com API de frete)

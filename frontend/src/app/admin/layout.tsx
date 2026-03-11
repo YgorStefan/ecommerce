@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   Users,
   Tag,
+  Folder,
   LogOut,
   Menu,
   Store,
@@ -24,6 +25,7 @@ import { cn } from '@/lib/utils';
 const adminNavLinks = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/products', label: 'Produtos', icon: Package },
+  { href: '/admin/categories', label: 'Categorias', icon: Folder },
   { href: '/admin/orders', label: 'Pedidos', icon: ShoppingBag },
   { href: '/admin/users', label: 'Usuários', icon: Users },
   { href: '/admin/coupons', label: 'Cupons', icon: Tag },

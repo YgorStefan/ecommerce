@@ -82,7 +82,7 @@ export class EmailService {
                 <li>Realizar compras com segurança</li>
                 <li>Acompanhar seus pedidos</li>
               </ul>
-              <a href="${this.configService.get('NEXT_PUBLIC_API_URL', 'http://localhost:3000')}" class="button">
+              <a href="${this.configService.get('FRONTEND_URL', 'http://localhost:3000')}" class="button">
                 Começar a comprar
               </a>
             </div>

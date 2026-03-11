@@ -2,8 +2,6 @@
 # Orquestra todos os serviços da aplicação: banco de dados, backend e frontend
 # Modo: PRODUÇÃO — usa as imagens buildadas pelo Dockerfile
 
-version: '3.9'
-
 services:
   # Serviço do banco de dados PostgreSQL
   postgres:
@@ -51,8 +49,11 @@ services:
     env_file:
       - .env
     environment:
-      # Garante que o frontend consegue chamar o backend dentro da rede Docker
+      # URL usada pelo browser do cliente (deve ser acessível externamente)
       - NEXT_PUBLIC_API_URL=http://localhost:3001
+      # URL interna usada por Server Components do Next.js dentro da rede Docker
+      # Usa o nome do serviço Docker em vez de localhost
+      - INTERNAL_API_URL=http://backend:3001
     ports:
       - '${FRONTEND_PORT:-3000}:3000'
     depends_on:
