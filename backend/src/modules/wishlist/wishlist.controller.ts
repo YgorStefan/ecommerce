@@ -33,30 +33,21 @@ export class WishlistController {
   // POST /api/wishlist — adiciona produto à wishlist
   @Post()
   @ApiOperation({ summary: 'Adicionar produto à lista de desejos' })
-  addItem(
-    @CurrentUser() user: User,
-    @Body() body: { productId: string },
-  ) {
+  addItem(@CurrentUser() user: User, @Body() body: { productId: string }) {
     return this.wishlistService.addItem(user.id, body.productId);
   }
 
   // DELETE /api/wishlist/:productId — remove produto da wishlist
   @Delete(':productId')
   @ApiOperation({ summary: 'Remover produto da lista de desejos' })
-  removeItem(
-    @CurrentUser() user: User,
-    @Param('productId') productId: string,
-  ) {
+  removeItem(@CurrentUser() user: User, @Param('productId') productId: string) {
     return this.wishlistService.removeItem(user.id, productId);
   }
 
   // GET /api/wishlist/check/:productId — verifica se produto está na wishlist
   @Get('check/:productId')
   @ApiOperation({ summary: 'Verificar se produto está na lista de desejos' })
-  checkItem(
-    @CurrentUser() user: User,
-    @Param('productId') productId: string,
-  ) {
+  checkItem(@CurrentUser() user: User, @Param('productId') productId: string) {
     return this.wishlistService.isInWishlist(user.id, productId);
   }
 }

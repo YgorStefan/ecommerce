@@ -2,18 +2,25 @@
 // DTO para os parâmetros de busca e filtragem de produtos
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsNumber, IsUUID, Min, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsUUID,
+  Min,
+  IsEnum,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 // Enum para as opções de ordenação de produtos
 export enum ProductSortBy {
-  PRICE_ASC = 'price_asc',         // Menor preço primeiro
-  PRICE_DESC = 'price_desc',       // Maior preço primeiro
-  NAME_ASC = 'name_asc',           // Ordem alfabética A-Z
-  NAME_DESC = 'name_desc',         // Ordem alfabética Z-A
-  CREATED_ASC = 'created_asc',     // Mais antigos primeiro
-  CREATED_DESC = 'created_desc',   // Mais recentes primeiro
-  RATING = 'rating',               // Melhor avaliação
+  PRICE_ASC = 'price_asc', // Menor preço primeiro
+  PRICE_DESC = 'price_desc', // Maior preço primeiro
+  NAME_ASC = 'name_asc', // Ordem alfabética A-Z
+  NAME_DESC = 'name_desc', // Ordem alfabética Z-A
+  CREATED_ASC = 'created_asc', // Mais antigos primeiro
+  CREATED_DESC = 'created_desc', // Mais recentes primeiro
+  RATING = 'rating', // Melhor avaliação
 }
 
 export class QueryProductDto {
@@ -46,7 +53,11 @@ export class QueryProductDto {
   maxPrice?: number;
 
   // Campo de ordenação dos resultados
-  @ApiProperty({ enum: ProductSortBy, description: 'Ordenação', required: false })
+  @ApiProperty({
+    enum: ProductSortBy,
+    description: 'Ordenação',
+    required: false,
+  })
   @IsOptional()
   @IsEnum(ProductSortBy)
   sortBy?: ProductSortBy;
@@ -60,7 +71,11 @@ export class QueryProductDto {
   page?: number = 1;
 
   // Quantidade de itens por página
-  @ApiProperty({ description: 'Itens por página', required: false, default: 12 })
+  @ApiProperty({
+    description: 'Itens por página',
+    required: false,
+    default: 12,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()

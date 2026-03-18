@@ -14,7 +14,10 @@ import {
 
 export class CreateProductDto {
   // Nome do produto — obrigatório
-  @ApiProperty({ example: 'Camiseta Básica Branca', description: 'Nome do produto' })
+  @ApiProperty({
+    example: 'Camiseta Básica Branca',
+    description: 'Nome do produto',
+  })
   @IsString()
   @MinLength(2)
   name: string;
@@ -32,7 +35,11 @@ export class CreateProductDto {
   price: number;
 
   // Preço original (para mostrar desconto) — opcional
-  @ApiProperty({ example: 69.99, description: 'Preço original', required: false })
+  @ApiProperty({
+    example: 69.99,
+    description: 'Preço original',
+    required: false,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -45,7 +52,11 @@ export class CreateProductDto {
   stock: number;
 
   // Código SKU — opcional mas deve ser único
-  @ApiProperty({ example: 'CAM-BR-M', description: 'Código SKU', required: false })
+  @ApiProperty({
+    example: 'CAM-BR-M',
+    description: 'Código SKU',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   sku?: string;

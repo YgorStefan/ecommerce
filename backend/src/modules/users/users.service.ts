@@ -58,7 +58,10 @@ export class UsersService {
   }
 
   // Atualiza o perfil do usuário autenticado
-  async updateProfile(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async updateProfile(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User> {
     // Verifica se o usuário existe antes de atualizar
     await this.findOne(userId);
 
@@ -78,7 +81,10 @@ export class UsersService {
     const user = await this.findOne(userId);
 
     // Verifica se a senha atual está correta antes de alterar
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
     if (!isPasswordValid) {
       throw new ForbiddenException('Senha atual incorreta');
     }
@@ -89,7 +95,10 @@ export class UsersService {
   }
 
   // Atualização administrativa de usuário (pode alterar role e status)
-  async adminUpdate(id: string, adminUpdateDto: AdminUpdateUserDto): Promise<User> {
+  async adminUpdate(
+    id: string,
+    adminUpdateDto: AdminUpdateUserDto,
+  ): Promise<User> {
     await this.findOne(id); // Verifica se existe
     await this.usersRepository.update(id, adminUpdateDto);
     return this.findOne(id);
@@ -105,7 +114,9 @@ export class UsersService {
   // Retorna estatísticas de usuários para o painel admin
   async getStats() {
     // Conta o total de usuários ativos
-    const total = await this.usersRepository.count({ where: { isActive: true } });
+    const total = await this.usersRepository.count({
+      where: { isActive: true },
+    });
 
     // Conta novos usuários dos últimos 30 dias
     const thirtyDaysAgo = new Date();

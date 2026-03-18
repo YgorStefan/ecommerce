@@ -46,7 +46,10 @@ export class OrderItem {
   productName: string;
 
   // URL da imagem do produto no momento da compra
-  @ApiProperty({ description: 'Imagem do produto no momento da compra', required: false })
+  @ApiProperty({
+    description: 'Imagem do produto no momento da compra',
+    required: false,
+  })
   @Column({ nullable: true })
   productImage: string;
 

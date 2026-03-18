@@ -9,7 +9,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Order, OrderStatus, PaymentMethod, PaymentStatus } from './entities/order.entity';
+import {
+  Order,
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { CartService } from '../cart/cart.service';
 import { CouponsService } from '../coupons/coupons.service';
@@ -63,7 +68,10 @@ export class OrdersService {
         subtotal,
       );
       couponId = coupon.id;
-      discountAmount = await this.couponsService.calculateDiscount(coupon, subtotal);
+      discountAmount = await this.couponsService.calculateDiscount(
+        coupon,
+        subtotal,
+      );
     }
 
     // Aplica desconto de 5% para pagamento via PIX
@@ -98,7 +106,7 @@ export class OrdersService {
     });
 
     // Salva o pedido no banco para obter o ID
-    const savedOrder = await this.ordersRepository.save(order) as any;
+    const savedOrder = await this.ordersRepository.save(order);
 
     // Cria os itens do pedido como snapshot dos produtos (para histórico imutável)
     const orderItems = cart.items.map((cartItem) =>
@@ -118,7 +126,10 @@ export class OrdersService {
 
     // Atualiza o estoque de cada produto vendido
     for (const cartItem of cart.items) {
-      await this.productsService.updateStock(cartItem.productId, cartItem.quantity);
+      await this.productsService.updateStock(
+        cartItem.productId,
+        cartItem.quantity,
+      );
     }
 
     // Incrementa o contador de uso do cupom se foi usado
@@ -209,7 +220,9 @@ export class OrdersService {
     const updatedOrder = await this.ordersRepository.save(order);
 
     // Notifica o cliente sobre a mudança de status por e-mail
-    this.emailService.sendOrderStatusUpdate(order.user, updatedOrder).catch(() => {});
+    this.emailService
+      .sendOrderStatusUpdate(order.user, updatedOrder)
+      .catch(() => {});
 
     return updatedOrder;
   }

@@ -23,8 +23,8 @@ import { EmailModule } from './modules/email/email.module';
   imports: [
     // ConfigModule: carrega variáveis de ambiente de forma global
     ConfigModule.forRoot({
-      isGlobal: true,   // Disponível em todos os módulos sem necessidade de reimportar
-      envFilePath: '.env', // Arquivo de variáveis de ambiente
+      isGlobal: true, // Disponível em todos os módulos sem necessidade de reimportar
+      envFilePath: join(__dirname, '../../.env'), // Arquivo de variáveis de ambiente
     }),
 
     // TypeOrmModule: configura a conexão com o banco de dados PostgreSQL

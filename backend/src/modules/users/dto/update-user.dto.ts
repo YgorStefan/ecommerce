@@ -2,7 +2,13 @@
 // DTO para atualização do perfil do usuário (todos os campos são opcionais)
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, MinLength, MaxLength, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  MinLength,
+  MaxLength,
+  IsEnum,
+} from 'class-validator';
 import { UserRole } from '../entities/user.entity';
 
 export class UpdateUserDto {

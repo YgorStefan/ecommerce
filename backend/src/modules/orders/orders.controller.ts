@@ -11,7 +11,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from './entities/order.entity';
@@ -31,10 +36,7 @@ export class OrdersController {
   // POST /api/orders — cria um novo pedido a partir do carrinho
   @Post()
   @ApiOperation({ summary: 'Criar pedido (checkout)' })
-  create(
-    @CurrentUser() user: User,
-    @Body() createOrderDto: CreateOrderDto,
-  ) {
+  create(@CurrentUser() user: User, @Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(user, createOrderDto);
   }
 
@@ -42,20 +44,14 @@ export class OrdersController {
   @Get('me')
   @ApiOperation({ summary: 'Listar meus pedidos' })
   @ApiQuery({ name: 'page', required: false })
-  findMyOrders(
-    @CurrentUser() user: User,
-    @Query('page') page?: number,
-  ) {
+  findMyOrders(@CurrentUser() user: User, @Query('page') page?: number) {
     return this.ordersService.findMyOrders(user.id, page);
   }
 
   // GET /api/orders/me/:id — detalhe de um pedido do usuário
   @Get('me/:id')
   @ApiOperation({ summary: 'Detalhe de meu pedido' })
-  findMyOrder(
-    @CurrentUser() user: User,
-    @Param('id') id: string,
-  ) {
+  findMyOrder(@CurrentUser() user: User, @Param('id') id: string) {
     return this.ordersService.findOne(id, user.id);
   }
 
@@ -77,10 +73,7 @@ export class OrdersController {
   @ApiOperation({ summary: '[Admin] Listar todos os pedidos' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'status', enum: OrderStatus, required: false })
-  findAll(
-    @Query('page') page?: number,
-    @Query('status') status?: OrderStatus,
-  ) {
+  findAll(@Query('page') page?: number, @Query('status') status?: OrderStatus) {
     return this.ordersService.findAll(page, 20, status);
   }
 
@@ -98,10 +91,7 @@ export class OrdersController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: '[Admin] Atualizar status do pedido' })
-  updateStatus(
-    @Param('id') id: string,
-    @Body() body: { status: OrderStatus },
-  ) {
+  updateStatus(@Param('id') id: string, @Body() body: { status: OrderStatus }) {
     return this.ordersService.updateStatus(id, body.status);
   }
 }

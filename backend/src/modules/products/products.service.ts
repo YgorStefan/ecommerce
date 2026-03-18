@@ -42,7 +42,7 @@ export class ProductsService {
     const qb = this.productsRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category') // JOIN com a tabela de categorias
-      .leftJoinAndSelect('product.images', 'images')     // JOIN com a tabela de imagens
+      .leftJoinAndSelect('product.images', 'images') // JOIN com a tabela de imagens
       .where('product.isActive = :isActive', { isActive: true }) // Apenas produtos ativos
       .andWhere('product.deletedAt IS NULL'); // Exclui produtos com soft delete
 
@@ -152,7 +152,9 @@ export class ProductsService {
     });
 
     // Verifica se já existe um produto com o mesmo slug e adiciona sufixo numérico se necessário
-    const existingProduct = await this.productsRepository.findOne({ where: { slug } });
+    const existingProduct = await this.productsRepository.findOne({
+      where: { slug },
+    });
     if (existingProduct) {
       // Adiciona timestamp para garantir unicidade do slug
       slug = `${slug}-${Date.now()}`;
@@ -167,7 +169,10 @@ export class ProductsService {
   }
 
   // Atualiza um produto existente
-  async update(id: string, updateDto: Partial<CreateProductDto>): Promise<Product> {
+  async update(
+    id: string,
+    updateDto: Partial<CreateProductDto>,
+  ): Promise<Product> {
     const product = await this.findOne(id);
 
     // Se o nome foi atualizado, regenera o slug
@@ -243,7 +248,9 @@ export class ProductsService {
 
   // Retorna estatísticas de produtos para o painel admin
   async getStats() {
-    const total = await this.productsRepository.count({ where: { isActive: true } });
+    const total = await this.productsRepository.count({
+      where: { isActive: true },
+    });
 
     // Busca os 5 produtos com menor estoque para alertas
     const lowStock = await this.productsRepository.find({

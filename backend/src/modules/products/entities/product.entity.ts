@@ -45,7 +45,10 @@ export class Product {
   price: number;
 
   // Preço original para mostrar desconto (opcional)
-  @ApiProperty({ description: 'Preço original (para mostrar desconto)', required: false })
+  @ApiProperty({
+    description: 'Preço original (para mostrar desconto)',
+    required: false,
+  })
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   originalPrice: number;
 
@@ -92,8 +95,8 @@ export class Product {
   // Relação OneToMany: um produto possui várias imagens
   @ApiProperty({ description: 'Imagens do produto', type: [ProductImage] })
   @OneToMany(() => ProductImage, (image) => image.product, {
-    cascade: true,   // Ao salvar o produto, as imagens são salvas automaticamente
-    eager: true,     // Carrega as imagens automaticamente junto com o produto
+    cascade: true, // Ao salvar o produto, as imagens são salvas automaticamente
+    eager: true, // Carrega as imagens automaticamente junto com o produto
   })
   images: ProductImage[];
 

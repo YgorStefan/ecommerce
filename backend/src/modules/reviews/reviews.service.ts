@@ -27,7 +27,10 @@ export class ReviewsService {
   ) {}
 
   // Cria uma avaliação para um produto
-  async create(userId: string, createReviewDto: CreateReviewDto): Promise<Review> {
+  async create(
+    userId: string,
+    createReviewDto: CreateReviewDto,
+  ): Promise<Review> {
     // Verifica se o produto existe
     const product = await this.productsRepository.findOne({
       where: { id: createReviewDto.productId },
@@ -94,7 +97,9 @@ export class ReviewsService {
 
     // Verifica se o usuário é o autor da avaliação ou um admin
     if (!isAdmin && review.userId !== userId) {
-      throw new ForbiddenException('Você não tem permissão para excluir esta avaliação');
+      throw new ForbiddenException(
+        'Você não tem permissão para excluir esta avaliação',
+      );
     }
 
     const productId = review.productId;

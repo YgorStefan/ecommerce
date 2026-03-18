@@ -12,7 +12,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { CouponsService, CreateCouponDto, UpdateCouponDto } from './coupons.service';
+import {
+  CouponsService,
+  CreateCouponDto,
+  UpdateCouponDto,
+} from './coupons.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -60,10 +64,7 @@ export class CouponsController {
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: '[Admin] Atualizar cupom' })
-  update(
-    @Param('id') id: string,
-    @Body() updateDto: UpdateCouponDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateCouponDto) {
     return this.couponsService.update(id, updateDto);
   }
 

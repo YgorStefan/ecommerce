@@ -57,10 +57,7 @@ export class CartController {
   // DELETE /api/cart/items/:itemId — remove um item do carrinho
   @Delete('items/:itemId')
   @ApiOperation({ summary: 'Remover item do carrinho' })
-  removeItem(
-    @CurrentUser() user: User,
-    @Param('itemId') itemId: string,
-  ) {
+  removeItem(@CurrentUser() user: User, @Param('itemId') itemId: string) {
     return this.cartService.removeItem(user.id, itemId);
   }
 

@@ -34,8 +34,8 @@ export class Cart {
   // Relação OneToMany: um carrinho contém vários itens
   @ApiProperty({ description: 'Itens no carrinho', type: [CartItem] })
   @OneToMany(() => CartItem, (item) => item.cart, {
-    cascade: true,  // Salva/deleta itens junto com o carrinho
-    eager: true,    // Carrega os itens automaticamente
+    cascade: true, // Salva/deleta itens junto com o carrinho
+    eager: true, // Carrega os itens automaticamente
   })
   items: CartItem[];
 
