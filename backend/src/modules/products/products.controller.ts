@@ -136,10 +136,7 @@ export class ProductsController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: '[Admin] Remover imagem do produto' })
-  removeImage(
-    @Param('id') id: string,
-    @Param('imageId') imageId: string,
-  ) {
+  removeImage(@Param('id') id: string, @Param('imageId') imageId: string) {
     return this.productsService.removeImage(id, imageId);
   }
 }

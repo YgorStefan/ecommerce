@@ -13,10 +13,13 @@ export class RolesGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     // Obtém os papéis necessários definidos pelo decorator @Roles()
-    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
-      context.getHandler(), // Metadados do método específico
-      context.getClass(),   // Metadados da classe (controller)
-    ]);
+    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
+      ROLES_KEY,
+      [
+        context.getHandler(), // Metadados do método específico
+        context.getClass(), // Metadados da classe (controller)
+      ],
+    );
 
     // Se não há papéis definidos, a rota é pública para usuários autenticados
     if (!requiredRoles) {

@@ -18,27 +18,27 @@ import { Coupon } from '../../coupons/entities/coupon.entity';
 
 // Enum para os possíveis estados de um pedido
 export enum OrderStatus {
-  PENDING = 'pending',         // Pedido criado, aguardando processamento
-  PROCESSING = 'processing',   // Pedido em processamento
-  SHIPPED = 'shipped',         // Pedido enviado ao cliente
-  DELIVERED = 'delivered',     // Pedido entregue ao cliente
-  CANCELLED = 'cancelled',     // Pedido cancelado
+  PENDING = 'pending', // Pedido criado, aguardando processamento
+  PROCESSING = 'processing', // Pedido em processamento
+  SHIPPED = 'shipped', // Pedido enviado ao cliente
+  DELIVERED = 'delivered', // Pedido entregue ao cliente
+  CANCELLED = 'cancelled', // Pedido cancelado
 }
 
 // Enum para os métodos de pagamento disponíveis
 export enum PaymentMethod {
-  CREDIT_CARD = 'credit_card',   // Cartão de crédito
-  DEBIT_CARD = 'debit_card',     // Cartão de débito
-  PIX = 'pix',                   // Pagamento via PIX
-  BOLETO = 'boleto',             // Boleto bancário
+  CREDIT_CARD = 'credit_card', // Cartão de crédito
+  DEBIT_CARD = 'debit_card', // Cartão de débito
+  PIX = 'pix', // Pagamento via PIX
+  BOLETO = 'boleto', // Boleto bancário
 }
 
 // Enum para o status do pagamento
 export enum PaymentStatus {
-  PENDING = 'pending',     // Aguardando pagamento
-  PAID = 'paid',           // Pagamento confirmado
-  FAILED = 'failed',       // Pagamento falhou
-  REFUNDED = 'refunded',   // Pagamento estornado
+  PENDING = 'pending', // Aguardando pagamento
+  PAID = 'paid', // Pagamento confirmado
+  FAILED = 'failed', // Pagamento falhou
+  REFUNDED = 'refunded', // Pagamento estornado
 }
 
 @Entity('orders')
@@ -66,8 +66,8 @@ export class Order {
   // Relação OneToMany: um pedido contém vários itens
   @ApiProperty({ description: 'Itens do pedido', type: [OrderItem] })
   @OneToMany(() => OrderItem, (item) => item.order, {
-    cascade: true,   // Salva os itens ao salvar o pedido
-    eager: true,     // Carrega os itens junto com o pedido
+    cascade: true, // Salva os itens ao salvar o pedido
+    eager: true, // Carrega os itens junto com o pedido
   })
   items: OrderItem[];
 

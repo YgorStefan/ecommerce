@@ -45,7 +45,11 @@ export class Review {
   productId: string;
 
   // Nota da avaliação de 1 a 5 estrelas
-  @ApiProperty({ description: 'Nota de 1 a 5 estrelas', minimum: 1, maximum: 5 })
+  @ApiProperty({
+    description: 'Nota de 1 a 5 estrelas',
+    minimum: 1,
+    maximum: 5,
+  })
   @Column()
   rating: number;
 

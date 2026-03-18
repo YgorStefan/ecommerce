@@ -59,7 +59,11 @@ export class CreateOrderDto {
   shippingAddress: ShippingAddressDto;
 
   // Código do cupom de desconto — opcional
-  @ApiProperty({ example: 'DESCONTO10', description: 'Código do cupom', required: false })
+  @ApiProperty({
+    example: 'DESCONTO10',
+    description: 'Código do cupom',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   couponCode?: string;

@@ -48,10 +48,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     // Retorna a resposta de erro formatada de forma padronizada
     response.status(status).json({
-      statusCode: status,       // Código HTTP do erro
+      statusCode: status, // Código HTTP do erro
       timestamp: new Date().toISOString(), // Momento em que o erro ocorreu
-      path: request.url,        // Rota que gerou o erro
-      message,                  // Mensagem descritiva do erro
+      path: request.url, // Rota que gerou o erro
+      message, // Mensagem descritiva do erro
     });
   }
 }

@@ -82,8 +82,11 @@ export class CouponsService {
   }
 
   // Calcula o valor do desconto a ser aplicado
-  async calculateDiscount(coupon: Coupon, orderSubtotal: number): Promise<number> {
-    let discount = 0;
+  async calculateDiscount(
+    coupon: Coupon,
+    orderSubtotal: number,
+  ): Promise<number> {
+    let discount: number;
 
     if (coupon.discountType === DiscountType.PERCENTAGE) {
       // Calcula o desconto percentual

@@ -16,8 +16,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 // Enum que define os possíveis papéis de um usuário no sistema
 export enum UserRole {
-  ADMIN = 'admin',   // Acesso total ao painel administrativo
-  USER = 'user',     // Acesso padrão do cliente da loja
+  ADMIN = 'admin', // Acesso total ao painel administrativo
+  USER = 'user', // Acesso padrão do cliente da loja
 }
 
 // @Entity() indica que esta classe é uma entidade TypeORM e mapeia para uma tabela

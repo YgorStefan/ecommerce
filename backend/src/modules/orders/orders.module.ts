@@ -15,10 +15,10 @@ import { EmailModule } from '../email/email.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderItem]),
-    CartModule,      // Para obter e limpar o carrinho
-    CouponsModule,   // Para validar e aplicar cupons
-    ProductsModule,  // Para atualizar o estoque
-    EmailModule,     // Para enviar confirmações por e-mail
+    CartModule, // Para obter e limpar o carrinho
+    CouponsModule, // Para validar e aplicar cupons
+    ProductsModule, // Para atualizar o estoque
+    EmailModule, // Para enviar confirmações por e-mail
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

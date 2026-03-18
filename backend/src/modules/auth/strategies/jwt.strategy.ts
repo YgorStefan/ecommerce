@@ -11,9 +11,9 @@ import { User } from '../../users/entities/user.entity';
 
 // Interface que define o payload contido no JWT
 export interface JwtPayload {
-  sub: string;     // ID do usuário (subject)
-  email: string;   // E-mail do usuário
-  role: string;    // Papel do usuário (admin/user)
+  sub: string; // ID do usuário (subject)
+  email: string; // E-mail do usuário
+  role: string; // Papel do usuário (admin/user)
 }
 
 @Injectable()

@@ -13,7 +13,7 @@ import { ApiProperty } from '@nestjs/swagger';
 // Enum para o tipo de desconto do cupom
 export enum DiscountType {
   PERCENTAGE = 'percentage', // Desconto em percentual (ex: 10%)
-  FIXED = 'fixed',           // Desconto em valor fixo (ex: R$ 20,00)
+  FIXED = 'fixed', // Desconto em valor fixo (ex: R$ 20,00)
 }
 
 @Entity('coupons')
@@ -25,10 +25,14 @@ export class Coupon {
 
   // Código do cupom que o cliente digita no checkout
   @ApiProperty({ description: 'Código do cupom (ex: DESCONTO10)' })
-  @Column({ unique: true, length: 50, transformer: {
-    to: (value: string) => value?.toUpperCase(), // Salva sempre em maiúsculas
-    from: (value: string) => value,
-  }})
+  @Column({
+    unique: true,
+    length: 50,
+    transformer: {
+      to: (value: string) => value?.toUpperCase(), // Salva sempre em maiúsculas
+      from: (value: string) => value,
+    },
+  })
   code: string;
 
   // Descrição interna do cupom para o admin

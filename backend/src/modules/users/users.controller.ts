@@ -74,10 +74,7 @@ export class UsersController {
   @ApiOperation({ summary: '[Admin] Listar todos os usuários' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
-  findAll(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ) {
+  findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
     return this.usersService.findAll(page, limit);
   }
 

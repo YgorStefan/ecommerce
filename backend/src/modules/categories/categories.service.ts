@@ -52,7 +52,9 @@ export class CategoriesService {
 
   // Busca uma categoria pelo slug (para URLs amigáveis)
   async findBySlug(slug: string): Promise<Category> {
-    const category = await this.categoriesRepository.findOne({ where: { slug } });
+    const category = await this.categoriesRepository.findOne({
+      where: { slug },
+    });
     if (!category) {
       throw new NotFoundException('Categoria não encontrada');
     }
@@ -63,13 +65,15 @@ export class CategoriesService {
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
     // Gera o slug a partir do nome da categoria
     const slug = slugify(createCategoryDto.name, {
-      lower: true,     // Converte para minúsculas
-      strict: true,    // Remove caracteres especiais
-      locale: 'pt',    // Trata caracteres do português (ç, ã, etc.)
+      lower: true, // Converte para minúsculas
+      strict: true, // Remove caracteres especiais
+      locale: 'pt', // Trata caracteres do português (ç, ã, etc.)
     });
 
     // Verifica se já existe uma categoria com o mesmo nome/slug
-    const existing = await this.categoriesRepository.findOne({ where: { slug } });
+    const existing = await this.categoriesRepository.findOne({
+      where: { slug },
+    });
     if (existing) {
       throw new ConflictException('Já existe uma categoria com este nome');
     }
@@ -83,7 +87,10 @@ export class CategoriesService {
   }
 
   // Atualiza uma categoria existente
-  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+  async update(
+    id: string,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<Category> {
     const category = await this.findOne(id);
 
     // Se o nome foi atualizado, regenera o slug

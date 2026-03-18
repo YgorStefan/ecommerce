@@ -48,10 +48,7 @@ export class ReviewsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Criar avaliação de produto' })
-  create(
-    @CurrentUser() user: User,
-    @Body() createReviewDto: CreateReviewDto,
-  ) {
+  create(@CurrentUser() user: User, @Body() createReviewDto: CreateReviewDto) {
     return this.reviewsService.create(user.id, createReviewDto);
   }
 
@@ -60,10 +57,7 @@ export class ReviewsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Remover avaliação' })
-  remove(
-    @CurrentUser() user: User,
-    @Param('id') id: string,
-  ) {
+  remove(@CurrentUser() user: User, @Param('id') id: string) {
     const isAdmin = user.role === UserRole.ADMIN;
     return this.reviewsService.remove(id, user.id, isAdmin);
   }

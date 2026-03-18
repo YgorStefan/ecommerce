@@ -27,7 +27,9 @@ export class CartService {
   ) {}
 
   // Obtém o carrinho do usuário logado (cria um se não existir)
-  async getCart(userId: string): Promise<Cart & { subtotal: number; itemCount: number }> {
+  async getCart(
+    userId: string,
+  ): Promise<Cart & { subtotal: number; itemCount: number }> {
     let cart = await this.cartsRepository.findOne({
       where: { userId },
       relations: ['items', 'items.product', 'items.product.images'],
@@ -101,7 +103,11 @@ export class CartService {
     } else {
       // Cria um novo item no carrinho
       await this.cartItemsRepository.save(
-        this.cartItemsRepository.create({ cartId: cart.id, productId, quantity }),
+        this.cartItemsRepository.create({
+          cartId: cart.id,
+          productId,
+          quantity,
+        }),
       );
     }
 

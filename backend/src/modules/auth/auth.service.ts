@@ -93,7 +93,10 @@ export class AuthService {
     }
 
     // Compara a senha fornecida com o hash armazenado
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciais inválidas');
@@ -145,7 +148,7 @@ export class AuthService {
   private async generateTokens(user: User) {
     // Payload comum para os dois tokens
     const payload = {
-      sub: user.id,     // Subject: ID do usuário
+      sub: user.id, // Subject: ID do usuário
       email: user.email,
       role: user.role,
     };

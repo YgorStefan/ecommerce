@@ -53,9 +53,7 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Renovar access token' })
-  async refreshTokens(
-    @Body() body: { userId: string; refreshToken: string },
-  ) {
+  async refreshTokens(@Body() body: { userId: string; refreshToken: string }) {
     return this.authService.refreshTokens(body.userId, body.refreshToken);
   }
 

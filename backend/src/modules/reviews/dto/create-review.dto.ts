@@ -13,7 +13,10 @@ import {
 } from 'class-validator';
 
 export class CreateReviewDto {
-  @ApiProperty({ example: 'uuid-do-produto', description: 'ID do produto avaliado' })
+  @ApiProperty({
+    example: 'uuid-do-produto',
+    description: 'ID do produto avaliado',
+  })
   @IsUUID()
   productId: string;
 
@@ -23,13 +26,21 @@ export class CreateReviewDto {
   @Max(5, { message: 'A nota máxima é 5' })
   rating: number;
 
-  @ApiProperty({ example: 'Produto excelente!', description: 'Título da avaliação', required: false })
+  @ApiProperty({
+    example: 'Produto excelente!',
+    description: 'Título da avaliação',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   title?: string;
 
-  @ApiProperty({ example: 'Muito satisfeito com a compra.', description: 'Comentário da avaliação', required: false })
+  @ApiProperty({
+    example: 'Muito satisfeito com a compra.',
+    description: 'Comentário da avaliação',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(1000)

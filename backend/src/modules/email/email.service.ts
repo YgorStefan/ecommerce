@@ -37,7 +37,10 @@ export class EmailService {
     try {
       // Envia o e-mail com o remetente configurado no ambiente
       await this.transporter.sendMail({
-        from: this.configService.get<string>('MAIL_FROM', 'E-commerce <noreply@ecommerce.com>'),
+        from: this.configService.get<string>(
+          'MAIL_FROM',
+          'E-commerce <noreply@ecommerce.com>',
+        ),
         to,
         subject,
         html,
@@ -159,12 +162,16 @@ export class EmailService {
                     <td colspan="3" style="padding: 10px; text-align: right;">Subtotal:</td>
                     <td style="padding: 10px; text-align: right;">R$ ${Number(order.subtotal).toFixed(2)}</td>
                   </tr>
-                  ${order.discountAmount > 0 ? `
+                  ${
+                    order.discountAmount > 0
+                      ? `
                   <tr>
                     <td colspan="3" style="padding: 10px; text-align: right; color: green;">Desconto:</td>
                     <td style="padding: 10px; text-align: right; color: green;">- R$ ${Number(order.discountAmount).toFixed(2)}</td>
                   </tr>
-                  ` : ''}
+                  `
+                      : ''
+                  }
                   <tr>
                     <td colspan="3" style="padding: 10px; text-align: right;">Frete:</td>
                     <td style="padding: 10px; text-align: right;">R$ ${Number(order.shippingCost).toFixed(2)}</td>
@@ -210,7 +217,8 @@ export class EmailService {
       [OrderStatus.CANCELLED]: 'Seu pedido foi cancelado.',
     };
 
-    const message = statusMessages[order.status] || 'O status do seu pedido foi atualizado.';
+    const message =
+      statusMessages[order.status] || 'O status do seu pedido foi atualizado.';
 
     const html = `
       <!DOCTYPE html>
