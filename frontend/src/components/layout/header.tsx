@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { ShoppingCart, User, Search, Menu, X, Heart, LogOut, Package, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { BackButton } from '@/components/ui/back-button';
 import { useAuthStore } from '@/store/auth.store';
 import { useCartStore } from '@/store/cart.store';
 import { cn } from '@/lib/utils';
@@ -48,11 +49,14 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
-          {/* Logo da loja */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
-            <Package className="h-6 w-6" />
-            <span>E-commerce</span>
-          </Link>
+          {/* Logo da loja e botão voltar */}
+          <div className="flex items-center gap-2">
+            <BackButton />
+            <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
+              <Package className="h-6 w-6" />
+              <span>E-commerce</span>
+            </Link>
+          </div>
 
           {/* Barra de busca — oculta em mobile */}
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-sm">
