@@ -3,16 +3,36 @@
 
 'use client';
 
-import { X, ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { X, ShoppingCart, Plus, Minus, Trash2, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useCartStore } from '@/store/cart.store';
+import { shippingService } from '@/services/api';
 import { formatCurrency } from '@/lib/utils';
 
 export function CartDrawer() {
   // Obtém o estado e ações do carrinho do store global
   const { cart, isOpen, closeCart, updateItem, removeItem, isLoading } = useCartStore();
+
+  const [zipCode, setZipCode] = useState('');
+  const [shippingResult, setShippingResult] = useState<any[]>([]);
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  const calculateShipping = async () => {
+    if (zipCode.length < 8) return;
+    setIsCalculating(true);
+    try {
+      const res = await shippingService.calculate(zipCode);
+      setShippingResult(res.data || []);
+    } catch {
+      setShippingResult([]);
+    } finally {
+      setIsCalculating(false);
+    }
+  };
 
   // Não renderiza nada se o drawer estiver fechado
   if (!isOpen) return null;
@@ -129,12 +149,42 @@ export function CartDrawer() {
           )}
         </div>
 
-        {/* Rodapé do drawer com subtotal e botão de checkout */}
+        {/* Rodapé do drawer com subtotal, frete e checkout */}
         {cart && cart.items.length > 0 && (
           <div className="p-4 border-t space-y-4">
+            
+            {/* Calculadora de frete */}
+            <div className="space-y-3 border-b pb-4">
+              <span className="text-sm font-medium">Calcular prazo e frete</span>
+              <div className="flex gap-2">
+                <Input
+                  className="h-9"
+                  placeholder="Seu CEP (00000000)"
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                  maxLength={8}
+                />
+                <Button size="sm" variant="secondary" onClick={calculateShipping} disabled={isCalculating || zipCode.length < 8}>
+                  {isCalculating ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Calcular'}
+                </Button>
+              </div>
+              {shippingResult.length > 0 && (
+                <div className="mt-3 space-y-2 rounded-md bg-muted p-3">
+                  {shippingResult.map((service, idx) => (
+                    <div key={idx} className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">{service.name} (até {service.deadline} dias úteis)</span>
+                      <span className="font-medium text-foreground">
+                        {service.error ? 'Indisponível' : formatCurrency(Number(service.price.replace(',', '.')))}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Subtotal do carrinho */}
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Subtotal</span>
+            <div className="flex justify-between items-center pt-2">
+              <span className="font-medium">Subtotal em Produtos</span>
               <span className="font-bold text-lg">{formatCurrency(cart.subtotal)}</span>
             </div>
 

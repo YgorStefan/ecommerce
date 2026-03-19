@@ -8,6 +8,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import helmet from 'helmet';
 
 async function bootstrap() {
   // Cria a instância da aplicação NestJS
@@ -18,6 +19,11 @@ async function bootstrap() {
 
   // Define o prefixo global para todas as rotas da API
   app.setGlobalPrefix('api');
+
+  // Adiciona proteção de headers HTTP com Helmet
+  app.use(helmet({
+    crossOriginResourcePolicy: false, // Permite que imagens do backend sejam servidas para o frontend
+  }));
 
   // Habilita CORS para permitir requisições do frontend
   app.enableCors({
