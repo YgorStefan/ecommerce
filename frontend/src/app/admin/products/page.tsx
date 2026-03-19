@@ -21,6 +21,7 @@ export default function AdminProductsPage() {
   const [search, setSearch] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Estado do formulário de produto
   const [formData, setFormData] = useState({
@@ -54,7 +55,17 @@ export default function AdminProductsPage() {
   // Mutation para criar produto
   const createMutation = useMutation({
     mutationFn: (data: any) => productsService.create(data),
-    onSuccess: () => {
+    onSuccess: async (res) => {
+      const productId = res.data?.data?.id || res.data?.id;
+      if (imageFile && productId) {
+        try {
+          const formData = new FormData();
+          formData.append('images', imageFile);
+          await productsService.uploadImages(productId, formData);
+        } catch (e) {
+          toast.error('Produto criado, mas erro ao salvar imagem.');
+        }
+      }
       toast.success('Produto criado com sucesso!');
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       closeForm();
@@ -68,7 +79,16 @@ export default function AdminProductsPage() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       productsService.update(id, data),
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
+      if (imageFile) {
+        try {
+          const formData = new FormData();
+          formData.append('images', imageFile);
+          await productsService.uploadImages(variables.id, formData);
+        } catch (e) {
+          toast.error('Produto atualizado, mas erro ao salvar imagem.');
+        }
+      }
       toast.success('Produto atualizado com sucesso!');
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       closeForm();
@@ -126,6 +146,7 @@ export default function AdminProductsPage() {
   const closeForm = () => {
     setIsFormOpen(false);
     setEditingProduct(null);
+    setImageFile(null);
   };
 
   // Envia o formulário (criar ou atualizar)
@@ -261,6 +282,20 @@ export default function AdminProductsPage() {
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
+              </div>
+
+              {/* Upload de Imagem */}
+              <div className="space-y-2 md:col-span-2">
+                <Label>Imagem do Produto</Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  className="cursor-pointer file:cursor-pointer file:bg-muted file:border-0 file:rounded-md file:px-4 file:mr-4 file:h-full hover:file:bg-accent"
+                />
+                {imageFile && (
+                  <p className="text-xs text-muted-foreground mt-1">Imagem selecionada: {imageFile.name}</p>
+                )}
               </div>
 
               {/* Produto em destaque */}

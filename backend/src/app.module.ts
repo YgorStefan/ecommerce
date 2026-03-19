@@ -5,6 +5,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { join } from 'path';
 
 // Importação de todos os módulos de domínio da aplicação
@@ -18,6 +20,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
 import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { CouponsModule } from './modules/coupons/coupons.module';
 import { EmailModule } from './modules/email/email.module';
+import { ShippingModule } from './modules/shipping/shipping.module';
 
 @Module({
   imports: [
@@ -26,6 +29,12 @@ import { EmailModule } from './modules/email/email.module';
       isGlobal: true, // Disponível em todos os módulos sem necessidade de reimportar
       envFilePath: join(__dirname, '../../.env'), // Arquivo de variáveis de ambiente
     }),
+
+    // ThrottlerModule: proteção contra ataques de força-bruta (Rate Limiting)
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 100, // Limita a 100 requisições por minuto por IP
+    }]),
 
     // TypeOrmModule: configura a conexão com o banco de dados PostgreSQL
     TypeOrmModule.forRootAsync({
@@ -63,6 +72,13 @@ import { EmailModule } from './modules/email/email.module';
     WishlistModule,
     CouponsModule,
     EmailModule,
+    ShippingModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

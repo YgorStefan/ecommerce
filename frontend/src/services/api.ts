@@ -239,3 +239,9 @@ export const couponsService = {
   // [Admin] Remove um cupom
   remove: (id: string) => api.delete(`/coupons/${id}`),
 };
+
+// Serviço de frete
+export const shippingService = {
+  // Calcula preço e prazo PAC/SEDEX
+  calculate: (zipCode: string) => api.get('/shipping/calculate', { params: { zipCode } }),
+};
