@@ -42,3 +42,8 @@ postgres_data/
 
 # Cache
 .eslintcache
+
+# next-sitemap SEO gerados no build
+frontend/public/robots.txt
+frontend/public/sitemap.xml
+frontend/public/sitemap-*.xml
