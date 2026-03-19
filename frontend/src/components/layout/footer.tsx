@@ -48,9 +48,11 @@ export function Footer() {
             </ul>
           </div>
         </div>
+      </div>
 
-        {/* Linha de copyright */}
-        <div className="mt-10 pt-8 border-t text-center text-sm text-muted-foreground">
+      {/* Linha de copyright */}
+      <div className="border-t">
+        <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} E-commerce. Todos os direitos reservados.</p>
         </div>
       </div>

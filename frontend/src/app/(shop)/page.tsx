@@ -74,6 +74,67 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ==================== PRODUTOS EM DESTAQUE ==================== */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="container mx-auto">
+          <div className="relative flex items-center justify-center mb-8">
+            <h2 className="text-3xl font-bold text-center">Destaques</h2>
+            <div className="absolute right-0">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/products?featured=true">
+                  Ver todos <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          {featuredProducts.length > 0 ? (
+            // Grade de produtos em destaque
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {featuredProducts.map((product: any) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            // Estado quando não há produtos em destaque
+            <div className="text-center py-12 text-muted-foreground">
+              <p>Nenhum produto em destaque no momento.</p>
+              <Button variant="outline" className="mt-4" asChild>
+                <Link href="/products">Ver todos os produtos</Link>
+              </Button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ==================== CATEGORIAS ==================== */}
+      {categories.length > 0 && (
+        <section className="py-16 px-4">
+          <div className="container mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold">Categorias</h2>
+              <Button variant="ghost" asChild>
+                <Link href="/products">Ver tudo <ArrowRight className="ml-1 h-4 w-4" /></Link>
+              </Button>
+            </div>
+            {/* Grade de categorias */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {categories.slice(0, 6).map((category: any) => (
+                <Link
+                  key={category.id}
+                  href={`/products?categoryId=${category.id}`}
+                  className="group flex flex-col items-center gap-2 p-4 rounded-lg border bg-card hover:bg-accent transition-colors text-center"
+                >
+                  <span className="font-medium text-sm group-hover:text-primary transition-colors">
+                    {category.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ==================== DIFERENCIAIS ==================== */}
       <section className="py-12 px-4 border-y bg-muted/30">
         <div className="container mx-auto">
@@ -122,65 +183,6 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ==================== CATEGORIAS ==================== */}
-      {categories.length > 0 && (
-        <section className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">Categorias</h2>
-              <Button variant="ghost" asChild>
-                <Link href="/products">Ver tudo <ArrowRight className="ml-1 h-4 w-4" /></Link>
-              </Button>
-            </div>
-            {/* Grade de categorias */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {categories.slice(0, 6).map((category: any) => (
-                <Link
-                  key={category.id}
-                  href={`/products?categoryId=${category.id}`}
-                  className="group flex flex-col items-center gap-2 p-4 rounded-lg border bg-card hover:bg-accent transition-colors text-center"
-                >
-                  <span className="font-medium text-sm group-hover:text-primary transition-colors">
-                    {category.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ==================== PRODUTOS EM DESTAQUE ==================== */}
-      <section className="py-16 px-4 bg-muted/30">
-        <div className="container mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold">Destaques</h2>
-            <Button variant="ghost" asChild>
-              <Link href="/products?featured=true">
-                Ver todos <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-
-          {featuredProducts.length > 0 ? (
-            // Grade de produtos em destaque
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {featuredProducts.map((product: any) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            // Estado quando não há produtos em destaque
-            <div className="text-center py-12 text-muted-foreground">
-              <p>Nenhum produto em destaque no momento.</p>
-              <Button variant="outline" className="mt-4" asChild>
-                <Link href="/products">Ver todos os produtos</Link>
-              </Button>
-            </div>
-          )}
         </div>
       </section>
     </div>
