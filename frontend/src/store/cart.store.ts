@@ -2,7 +2,7 @@
 // Store Zustand para gerenciamento global do carrinho de compras
 
 import { create } from 'zustand';
-import { Cart, CartItem } from '@/types';
+import { Cart } from '@/types';
 import { cartService } from '@/services/api';
 
 // Interface do estado e ações do store do carrinho
