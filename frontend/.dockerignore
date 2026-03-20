@@ -1,0 +1,50 @@
+# .dockerignore — Frontend Next.js
+# Evita que arquivos desnecessários sejam enviados ao contexto de build do Docker.
+# node_modules e .next são os maiores culpados pelo cache corrompido e build lento.
+
+# Dependências — instaladas dentro do container via npm ci
+node_modules/
+
+# Build anterior do Next.js — gerado dentro do container via npm run build
+.next/
+out/
+
+# Arquivos de ambiente — secrets não devem entrar na imagem
+.env
+.env.*
+.env.local
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor e SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Cobertura de testes
+coverage/
+
+# Docker (evitar recursão)
+Dockerfile*
+.dockerignore
+
+# SEO gerados — não precisam entrar no contexto
+public/robots.txt
+public/sitemap.xml
+public/sitemap-*.xml
+
+# README
+README.md

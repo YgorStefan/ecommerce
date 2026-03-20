@@ -1,6 +1,6 @@
 # docker-compose.yml
 # Orquestra todos os serviços da aplicação: banco de dados, backend e frontend
-# Modo: PRODUÇÃO — usa as imagens buildadas pelo Dockerfile
+# Modo: PRODUÇÃO — usa as imagens buildadas pelo Dockerfile multi-stage
 
 services:
   # Serviço do banco de dados PostgreSQL
@@ -28,6 +28,15 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      # BUILD_DATE invalida o cache de forma controlada: muda a cada build disparado
+      # pelo Makefile/CI, mas não afeta o cache de npm ci (que depende de package.json).
+      # Isso garante que o código-fonte seja sempre recopiado sem reinstalar deps.
+      args:
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+        GIT_HASH: ${GIT_HASH:-unknown}
+    # pull_policy: build força o Docker a usar a imagem buildada localmente,
+    # nunca tentando puxar do registry quando não existe tag de registry configurada.
+    pull_policy: build
     container_name: ecommerce_backend
     restart: unless-stopped
     env_file:
@@ -37,28 +46,29 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    # Sem volumes de código — usa o que foi buildado na imagem Docker
 
   # Serviço do frontend Next.js
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+        GIT_HASH: ${GIT_HASH:-unknown}
+    pull_policy: build
     container_name: ecommerce_frontend
     restart: unless-stopped
     env_file:
       - .env
     environment:
       # URL usada pelo browser do cliente (deve ser acessível externamente)
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001}
       # URL interna usada por Server Components do Next.js dentro da rede Docker
-      # Usa o nome do serviço Docker em vez de localhost
       - INTERNAL_API_URL=http://backend:3001
     ports:
       - '${FRONTEND_PORT:-3000}:3000'
     depends_on:
       - backend
-    # Sem volumes de código — usa o que foi buildado na imagem Docker
 
 # Volumes nomeados para persistência de dados
 volumes:

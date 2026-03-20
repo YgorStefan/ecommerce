@@ -1,0 +1,27 @@
+# Dockerfile.dev — Backend NestJS (DESENVOLVIMENTO)
+# Propósito: apenas instalar dependências e expor o ambiente para hot-reload via volume.
+# O código fonte NÃO é copiado para dentro da imagem — ele é montado via volume no docker-compose.dev.yml.
+# Isso garante que qualquer mudança no host aparece imediatamente dentro do container.
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instala ferramentas necessárias para algumas dependências nativas (ex: bcrypt)
+RUN apk add --no-cache python3 make g++
+
+# Copia apenas os manifests — o Docker recria esta layer somente quando
+# package.json ou package-lock.json mudarem, mantendo o cache de npm ci rápido.
+COPY package*.json ./
+
+# Instala TODAS as dependências (inclui devDeps necessárias para ts-node e @nestjs/cli)
+RUN npm ci
+
+# node_modules fica dentro da imagem; o volume no docker-compose vai montar
+# apenas /app, mas o docker-compose tem uma entrada anônima /app/node_modules
+# que "protege" o node_modules do container de ser sobrescrito pelo host.
+
+EXPOSE 3001
+
+# O comando real é definido no docker-compose.dev.yml como `npm run start:dev`
+CMD ["npm", "run", "start:dev"]

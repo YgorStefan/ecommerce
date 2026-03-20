@@ -1,1 +1,0 @@
-SHOW hba_file;
