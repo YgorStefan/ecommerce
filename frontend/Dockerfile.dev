@@ -1,0 +1,25 @@
+# Dockerfile.dev — Frontend Next.js (DESENVOLVIMENTO)
+# Propósito: instalar dependências e criar o ambiente para hot-reload.
+# O código fonte é montado via volume no docker-compose.dev.yml — sem build multi-stage.
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copia apenas os manifests — garante que o cache de npm ci seja reutilizado
+# enquanto somente o package.json não mudar (não importa mudanças no src/).
+COPY package*.json ./
+
+# Instala todas as dependências incluindo devDeps (necessárias para next dev)
+RUN npm ci
+
+# node_modules permanece dentro do container (isolado do host via volume anônimo)
+# O .next também fica isolado para não gerar conflitos entre builds de host e container.
+
+EXPOSE 3000
+
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["npm", "run", "dev"]

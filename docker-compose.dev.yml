@@ -1,6 +1,12 @@
 # docker-compose.dev.yml
-# Modo DESENVOLVIMENTO — monta o código local para hot-reload
-# Uso: docker-compose -f docker-compose.dev.yml up
+# Modo DESENVOLVIMENTO — hot-reload via montagem de volume do código fonte
+# Uso: docker compose -f docker-compose.dev.yml up --build
+#
+# Arquitetura de volumes para hot-reload:
+#   - O volume nomeado (ex: ./backend:/app) monta o código do host dentro do container
+#   - O volume anônimo (/app/node_modules) "protege" the node_modules instalado
+#     dentro do container de ser sobrescrito pelo host (que provavelmente tem
+#     uma versão diferente compilada para Windows/Mac vs Linux Alpine)
 
 services:
   postgres:
@@ -8,15 +14,17 @@ services:
     container_name: ecommerce_postgres_dev
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ecommerce
-      POSTGRES_PASSWORD: ecommerce123
-      POSTGRES_DB: ecommerce_db
+      POSTGRES_USER: ${DB_USER:-ecommerce}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ecommerce123}
+      POSTGRES_DB: ${DB_NAME:-ecommerce_db}
     ports:
-      - '5432:5432'
+      # Usa 5434 no host para evitar conflito com PostgreSQL instalado localmente no Windows
+      # (que normalmente já ocupa a porta 5432). Internamente o container continua usando 5432.
+      - '5434:5432'
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ecommerce -d ecommerce_db']
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-ecommerce} -d ${DB_NAME:-ecommerce_db}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -24,39 +32,53 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      # Usa o Dockerfile dedicado para desenvolvimento — sem multi-stage,
+      # sem compilação TypeScript na imagem. O ts-node/swc compila on-the-fly.
+      dockerfile: Dockerfile.dev
     container_name: ecommerce_backend_dev
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      # Garante que o NestJS rode em modo dev dentro do container
+      - NODE_ENV=development
     ports:
-      - '3001:3001'
+      - '${BACKEND_PORT:-3001}:3001'
     depends_on:
       postgres:
         condition: service_healthy
-    # Monta o código fonte para hot-reload — node_modules fica isolado no container
     volumes:
+      # Monta o código fonte do host para hot-reload
       - ./backend:/app
+      # Protege o node_modules Linux dentro do container de ser sobrescrito
+      # pelo node_modules do Windows no host (incompatível por binários nativos)
       - /app/node_modules
     command: npm run start:dev
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      # Usa o Dockerfile dedicado para desenvolvimento
+      dockerfile: Dockerfile.dev
     container_name: ecommerce_frontend_dev
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001}
       - INTERNAL_API_URL=http://backend:3001
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
     ports:
-      - '3000:3000'
+      - '${FRONTEND_PORT:-3000}:3000'
     depends_on:
       - backend
-    # Monta o código fonte para hot-reload — node_modules e .next ficam isolados
     volumes:
+      # Monta o código fonte do host para hot-reload
       - ./frontend:/app
+      # Protege node_modules Linux dentro do container
       - /app/node_modules
+      # Protege a pasta .next — evita conflito entre build do host e do container
       - /app/.next
     command: npm run dev
 

@@ -1,43 +1,57 @@
-# Dockerfile do Backend NestJS
-# Build multi-stage para reduzir o tamanho da imagem final
+# Dockerfile do Backend NestJS — Produção
+# Build multi-stage: compila o TypeScript e gera apenas o necessário na imagem final.
+# By design, apenas a pasta dist/ e as prod dependencies vão para a imagem de produção.
 
-# ==================== STAGE 1: BUILD ====================
+# ==================== STAGE 1: BUILDER ====================
 FROM node:20-alpine AS builder
 
-# Define o diretório de trabalho dentro do container
 WORKDIR /app
 
-# Copia os arquivos de dependências primeiro (melhor uso do cache do Docker)
+# Copia manifests primeiro — o Docker só invalida esta layer se package.json ou
+# package-lock.json mudarem, mantendo o cache de npm ci intacto para builds subsequentes.
 COPY package*.json ./
 
-# Instala todas as dependências incluindo as de desenvolvimento
+# Instala TODAS as dependências (incluindo devDeps necessárias para o tsc)
 RUN npm ci
 
-# Copia o código fonte para o container
+# Copia o restante do código (apenas o que não está no .dockerignore)
 COPY . .
 
-# Compila o TypeScript para JavaScript
+# Compila TypeScript → JavaScript
 RUN npm run build
 
 # ==================== STAGE 2: PRODUÇÃO ====================
 FROM node:20-alpine AS production
 
+# Roda como usuário não-root por segurança — boa prática obrigatória em produção
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 WORKDIR /app
 
-# Copia os arquivos de dependências
+# Copia manifests para instalar apenas as prod dependencies
 COPY package*.json ./
 
-# Instala apenas as dependências de produção (menor tamanho)
-RUN npm ci --omit=dev
+# --omit=dev garante que devDependencies não entrem na imagem final
+RUN npm ci --omit=dev && npm cache clean --force
 
-# Copia o código compilado do stage de build
+# Copia o código compilado do stage builder
 COPY --from=builder /app/dist ./dist
 
-# Cria a pasta de uploads para armazenamento de imagens
-RUN mkdir -p uploads/products
+# Cria a pasta de uploads com permissões corretas para o usuário não-root
+RUN mkdir -p uploads/products && chown -R appuser:appgroup /app
 
-# Expõe a porta que o servidor NestJS vai escutar
+# Muda para o usuário não-root antes de iniciar o processo
+USER appuser
+
+# Documenta a porta exposta (não publica — isso é responsabilidade do docker-compose)
 EXPOSE 3001
 
-# Comando para iniciar o servidor em produção
+# ARG recebida do docker-compose build args — usada apenas como label de rastreabilidade,
+# não invalida a layer de npm ci (que é o que queremos preservar em cache)
+ARG BUILD_DATE=unknown
+ARG GIT_HASH=unknown
+LABEL org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.revision="${GIT_HASH}" \
+      org.opencontainers.image.title="ecommerce-backend"
+
 CMD ["node", "dist/main"]

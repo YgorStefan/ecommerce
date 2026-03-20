@@ -1,0 +1,47 @@
+# .dockerignore — Backend NestJS
+# Evita que arquivos desnecessários sejam enviados ao contexto de build do Docker.
+# Sem este arquivo, o Docker inclui node_modules e dist no contexto,
+# o que corrompe o cache das layers e infla desnecessariamente o tamanho da imagem.
+
+# Dependências — serão instaladas dentro do container via npm ci
+node_modules/
+
+# Build anterior — será gerado dentro do container via npm run build
+dist/
+
+# Uploads de usuário — não fazem parte do código-fonte
+uploads/
+
+# Arquivos de ambiente — secrets não devem entrar na imagem
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cobertura de testes
+coverage/
+
+# Editor e SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Docker (evitar recursão)
+Dockerfile*
+.dockerignore
+
+# README
+README.md

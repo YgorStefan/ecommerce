@@ -22,6 +22,19 @@ const nextConfig = {
       },
     ],
   },
+  
+  // Configuração crítica para WSL2/Windows com Docker!
+  // Como o sistema de arquivos do Windows não emite eventos nativos do Linux (inotify),
+  // forçamos o Next.js a usar "polling" (verificar as pastas a cada segundo).
+  webpack: (config, context) => {
+    if (context.dev) {
+      config.watchOptions = {
+        poll: 1000, // Verifica alterações a cada 1 segundo
+        aggregateTimeout: 300,
+      };
+    }
+    return config;
+  },
 };
 
 module.exports = nextConfig;
