@@ -5,11 +5,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { Tag, CheckCircle } from 'lucide-react';
+import { Tag, CheckCircle, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,6 +30,10 @@ const checkoutSchema = z.object({
   zipCode: z.string().min(8, 'CEP inválido'),
   phone: z.string().min(10, 'Telefone é obrigatório'),
   paymentMethod: z.enum(['credit_card', 'debit_card', 'pix', 'boleto']),
+  cardNumber: z.string().optional(),
+  cardName: z.string().optional(),
+  cardExpiry: z.string().optional(),
+  cardCvv: z.string().optional(),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -39,16 +43,15 @@ export default function CheckoutPage() {
   const { cart, clearCart } = useCartStore();
   const { user, isAuthenticated } = useAuthStore();
 
-  // Estados locais para cupom de desconto
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
-  // Preenche o formulário com os dados do usuário logado como padrão
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -59,11 +62,15 @@ export default function CheckoutPage() {
       state: user?.state || '',
       zipCode: user?.zipCode || '',
       phone: user?.phone || '',
-      paymentMethod: 'pix',
+      paymentMethod: 'credit_card',
     },
   });
 
-  // Redireciona para login ou loja usando useEffect para evitar erros de SSR
+  const selectedPaymentMethod = useWatch({
+    control,
+    name: "paymentMethod",
+  });
+
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login');
@@ -72,39 +79,30 @@ export default function CheckoutPage() {
     }
   }, [isAuthenticated, cart, router]);
 
-  // Mostra nada enquanto verifica/redireciona
   if (!isAuthenticated || !cart || cart.items.length === 0) {
     return null;
   }
 
-  // Calcula os valores do pedido
   const subtotal = cart.subtotal;
-  const shippingCost = subtotal > 200 ? 0 : 19.9; // Frete grátis acima de R$ 200
+  const shippingCost = subtotal > 200 ? 0 : 19.9;
   const total = subtotal - discountAmount + shippingCost;
 
-  // Aplica o cupom de desconto ao subtotal
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
-
     setIsApplyingCoupon(true);
     try {
       const response = await couponsService.validate(couponCode, subtotal);
       const coupon = response.data.data;
       setAppliedCoupon(coupon);
-
-      // Calcula o desconto baseado no tipo do cupom
       let discount = 0;
       if (coupon.discountType === 'percentage') {
         discount = (subtotal * Number(coupon.discountValue)) / 100;
-        if (coupon.maximumDiscount) {
-          discount = Math.min(discount, Number(coupon.maximumDiscount));
-        }
+        if (coupon.maximumDiscount) discount = Math.min(discount, Number(coupon.maximumDiscount));
       } else {
         discount = Math.min(Number(coupon.discountValue), subtotal);
       }
-
       setDiscountAmount(Math.round(discount * 100) / 100);
-      toast.success(`Cupom "${coupon.code}" aplicado com sucesso!`);
+      toast.success(`Cupom "${coupon.code}" aplicado!`);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Cupom inválido');
       setAppliedCoupon(null);
@@ -114,16 +112,19 @@ export default function CheckoutPage() {
     }
   };
 
-  // Remove o cupom aplicado
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
     setDiscountAmount(0);
     setCouponCode('');
   };
 
-  // Finaliza o pedido
   const onSubmit = async (data: CheckoutFormData) => {
     try {
+      if (data.paymentMethod === 'credit_card' && (!data.cardNumber || !data.cardExpiry || !data.cardCvv)) {
+        toast.error("Preencha os dados do cartão para continuar.");
+        return;
+      }
+      
       const response = await ordersService.create({
         paymentMethod: data.paymentMethod,
         shippingAddress: {
@@ -138,11 +139,7 @@ export default function CheckoutPage() {
       });
 
       const order = response.data.data;
-
-      // Limpa o carrinho após o pedido bem-sucedido
       await clearCart();
-
-      // Redireciona para a página de sucesso com o número do pedido
       router.push(`/checkout/success?orderNumber=${order.orderNumber}`);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Erro ao finalizar o pedido');
@@ -154,88 +151,60 @@ export default function CheckoutPage() {
       <h1 className="text-2xl font-bold mb-8">Finalizar Compra</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* ==================== FORMULÁRIO DE CHECKOUT ==================== */}
         <div className="lg:col-span-2">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Seção de endereço de entrega */}
             <Card>
               <CardHeader>
                 <CardTitle>Endereço de Entrega</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Nome do destinatário */}
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome completo</Label>
                   <Input id="name" {...register('name')} />
-                  {errors.name && (
-                    <p className="text-sm text-destructive">{errors.name.message}</p>
-                  )}
+                  {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
                 </div>
-
-                {/* Endereço */}
                 <div className="space-y-2">
                   <Label htmlFor="address">Endereço</Label>
                   <Input id="address" placeholder="Rua, número, complemento" {...register('address')} />
-                  {errors.address && (
-                    <p className="text-sm text-destructive">{errors.address.message}</p>
-                  )}
+                  {errors.address && <p className="text-sm text-destructive">{errors.address.message}</p>}
                 </div>
-
-                {/* Cidade e Estado na mesma linha */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="city">Cidade</Label>
                     <Input id="city" {...register('city')} />
-                    {errors.city && (
-                      <p className="text-sm text-destructive">{errors.city.message}</p>
-                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="state">Estado</Label>
                     <Input id="state" placeholder="SP" maxLength={2} {...register('state')} />
-                    {errors.state && (
-                      <p className="text-sm text-destructive">{errors.state.message}</p>
-                    )}
                   </div>
                 </div>
-
-                {/* CEP e Telefone na mesma linha */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="zipCode">CEP</Label>
                     <Input id="zipCode" placeholder="00000-000" {...register('zipCode')} />
-                    {errors.zipCode && (
-                      <p className="text-sm text-destructive">{errors.zipCode.message}</p>
-                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Telefone</Label>
                     <Input id="phone" placeholder="(11) 99999-9999" {...register('phone')} />
-                    {errors.phone && (
-                      <p className="text-sm text-destructive">{errors.phone.message}</p>
-                    )}
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Seção de método de pagamento */}
             <Card>
               <CardHeader>
                 <CardTitle>Método de Pagamento</CardTitle>
               </CardHeader>
-              <CardContent>
-                {/* Opções de pagamento como radio buttons estilizados */}
+              <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { value: 'pix', label: 'PIX', description: '5% desconto' },
                     { value: 'credit_card', label: 'Cartão de Crédito', description: 'Até 12x' },
-                    { value: 'debit_card', label: 'Cartão de Débito', description: 'À vista' },
+                    { value: 'pix', label: 'PIX', description: '5% desconto' },
                     { value: 'boleto', label: 'Boleto', description: 'Vence em 3 dias' },
                   ].map((option) => (
                     <label
                       key={option.value}
-                      className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
+                      className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors ${selectedPaymentMethod === option.value ? 'bg-accent/50 border-primary' : ''}`}
                     >
                       <input
                         type="radio"
@@ -250,10 +219,41 @@ export default function CheckoutPage() {
                     </label>
                   ))}
                 </div>
+
+                {/* Checkout Transparente - Campos Mock do Cartão */}
+                {selectedPaymentMethod === 'credit_card' && (
+                  <div className="mt-4 p-4 border rounded-lg bg-muted/30 space-y-4 animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                      <h4 className="font-medium">Dados do Cartão (Checkout Transparente)</h4>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="cardNumber">Número do Cartão</Label>
+                      <Input id="cardNumber" placeholder="0000 0000 0000 0000" {...register('cardNumber')} maxLength={19} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="cardName">Nome no Cartão</Label>
+                      <Input id="cardName" placeholder="NOME DO TITULAR" {...register('cardName')} className="uppercase" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="cardExpiry">Validade</Label>
+                        <Input id="cardExpiry" placeholder="MM/AA" {...register('cardExpiry')} maxLength={5} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="cardCvv">CVV</Label>
+                        <Input id="cardCvv" placeholder="123" {...register('cardCvv')} maxLength={4} type="password" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground pt-1 text-center">
+                      💳 Este é um ambiente seguro simulado.
+                    </p>
+                  </div>
+                )}
+
               </CardContent>
             </Card>
 
-            {/* Botão de finalizar — apenas visível em telas grandes */}
             <Button type="submit" size="lg" className="w-full hidden lg:flex" disabled={isSubmitting}>
               {isSubmitting ? 'Processando...' : `Finalizar Pedido — ${formatCurrency(total)}`}
             </Button>

@@ -10,6 +10,7 @@ import { ShoppingCart, User, Search, Menu, X, Heart, LogOut, Package, Settings }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BackButton } from '@/components/ui/back-button';
+import { SearchBar } from '@/components/search/search-bar';
 import { useAuthStore } from '@/store/auth.store';
 import { useCartStore } from '@/store/cart.store';
 import { cn } from '@/lib/utils';
@@ -29,14 +30,6 @@ export function Header() {
 
   // Conta o total de itens no carrinho para o badge
   const itemCount = cart?.itemCount || 0;
-
-  // Navega para a página de busca com o termo digitado
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/products?search=${encodeURIComponent(searchQuery)}`);
-    }
-  };
 
   // Realiza logout e redireciona para a home
   const handleLogout = async () => {
@@ -59,18 +52,9 @@ export function Header() {
           </div>
 
           {/* Barra de busca — oculta em mobile */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-sm">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Buscar produtos..."
-                className="pl-9 pr-4"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </form>
+          <div className="hidden md:flex flex-1 max-w-sm justify-center">
+            <SearchBar />
+          </div>
 
           {/* Navegação e ações do header */}
           <nav className="flex items-center gap-2">
@@ -189,16 +173,9 @@ export function Header() {
         {isMobileMenuOpen && (
           <div className="md:hidden pb-4 border-t pt-4 space-y-3">
             {/* Busca no mobile */}
-            <form onSubmit={handleSearch} className="flex gap-2">
-              <Input
-                type="search"
-                placeholder="Buscar produtos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1"
-              />
-              <Button type="submit" size="sm">Buscar</Button>
-            </form>
+            <div className="w-full flex justify-center">
+              <SearchBar />
+            </div>
 
             {/* Links de autenticação no mobile */}
             {!isAuthenticated && (

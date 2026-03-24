@@ -8,7 +8,11 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Res,
+  Req,
+  UnauthorizedException,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -34,9 +38,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Cadastrar novo usuário' })
   @ApiResponse({ status: 201, description: 'Usuário cadastrado com sucesso' })
   @ApiResponse({ status: 409, description: 'E-mail já cadastrado' })
-  async register(@Body() registerDto: RegisterDto) {
+  async register(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) res: Response) {
     // Delega o processamento para o serviço de autenticação
-    return this.authService.register(registerDto);
+    const result = await this.authService.register(registerDto);
+    res.cookie('accessToken', result.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+    return { user: result.user };
   }
 
   // POST /api/auth/login — autenticação com e-mail e senha
@@ -45,16 +52,23 @@ export class AuthController {
   @ApiOperation({ summary: 'Realizar login' })
   @ApiResponse({ status: 200, description: 'Login realizado com sucesso' })
   @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.login(loginDto);
+    res.cookie('accessToken', result.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+    return { user: result.user };
   }
 
   // POST /api/auth/refresh — renova o access token usando o refresh token
-  @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Renovar access token' })
-  async refreshTokens(@Body() body: { userId: string; refreshToken: string }) {
-    return this.authService.refreshTokens(body.userId, body.refreshToken);
+  async refreshTokens(@Body() body: { userId: string }, @Req() req: any, @Res({ passthrough: true }) res: Response) {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token missing');
+    }
+    const result = await this.authService.refreshTokens(body.userId, refreshToken);
+    res.cookie('accessToken', result.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+    return { success: true };
   }
 
   // POST /api/auth/logout — invalida o refresh token do usuário
@@ -63,8 +77,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth() // Indica no Swagger que requer token Bearer
   @ApiOperation({ summary: 'Realizar logout' })
-  async logout(@CurrentUser() user: User) {
+  async logout(@CurrentUser() user: User, @Res({ passthrough: true }) res: Response) {
     // @CurrentUser() extrai o usuário autenticado da requisição
-    return this.authService.logout(user.id);
+    await this.authService.logout(user.id);
+    res.clearCookie('accessToken', { path: '/' });
+    res.clearCookie('refreshToken', { path: '/' });
+    return { success: true };
   }
 }

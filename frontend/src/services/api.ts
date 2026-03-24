@@ -9,63 +9,43 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 // Cria a instância principal do Axios com configurações padrão
 export const api = axios.create({
   baseURL: `${API_URL}/api`, // Todas as requisições usam /api como prefixo
+  withCredentials: true,     // Global flag for cookies
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor de requisição — adiciona o token JWT automaticamente
+// Interceptor de requisição limpo: os cookies dão bypass manual the auth headers
 api.interceptors.request.use(
-  (config) => {
-    // Lê o token de acesso do localStorage (disponível apenas no browser)
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        // Adiciona o token no header Authorization
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return config;
-  },
+  (config) => config,
   (error) => Promise.reject(error),
 );
 
+
 // Interceptor de resposta — trata erros e renova tokens expirados
 api.interceptors.response.use(
-  // Retorna a resposta diretamente se for bem-sucedida
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as any;
 
-    // Se o erro é 401 (não autorizado) e não é uma tentativa de retry
     if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // Marca para evitar loop infinito
+      originalRequest._retry = true;
 
       try {
-        // Tenta renovar o access token usando o refresh token
-        const refreshToken = localStorage.getItem('refreshToken');
         const userId = localStorage.getItem('userId');
-
-        if (refreshToken && userId) {
-          const response = await axios.post(`${API_URL}/api/auth/refresh`, {
+        
+        // As long as we have internal user concept, attempt to hit refresh.
+        // O refreshToken real estará embutido no Cookie
+        if (userId) {
+          await axios.post(`${API_URL}/api/auth/refresh`, {
             userId,
-            refreshToken,
-          });
+          }, { withCredentials: true });
 
-          const { accessToken } = response.data.data;
-
-          // Salva o novo access token
-          localStorage.setItem('accessToken', accessToken);
-
-          // Repete a requisição original com o novo token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          // Cookies are automatically updated, re-dispatch request!
           return api(originalRequest);
         }
       } catch {
-        // Se não conseguir renovar, limpa a sessão e redireciona para login
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
           localStorage.removeItem('userId');
           window.location.href = '/login';
         }
@@ -242,6 +222,7 @@ export const couponsService = {
 
 // Serviço de frete
 export const shippingService = {
-  // Calcula preço e prazo PAC/SEDEX
-  calculate: (zipCode: string) => api.get('/shipping/calculate', { params: { zipCode } }),
+  // Calcula preço e prazo PAC/SEDEX (usando a API Serverless gratuita do Next.js)
+  calculate: (zipCode: string) => axios.get('/api/shipping/calculate', { params: { zipCode } }),
 };
+

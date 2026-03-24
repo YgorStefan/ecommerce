@@ -1,20 +1,19 @@
 // (shop)/page.tsx
-// Página inicial da loja — hero, produtos em destaque e categorias
+// Página inicial da loja — hero, produtos em destaque e categorias otimizados com Suspense e Streaming
 
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Truck, Shield, RefreshCw, Headphones } from 'lucide-react';
+import { ArrowRight, Truck, Shield, RefreshCw, Headphones, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product/product-card';
 
-// Busca os produtos em destaque do servidor (Server Component)
+// =================== BUSCA DE DADOS ===================
+
 async function getFeaturedProducts() {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/products?featured=true&limit=8`,
-      {
-        next: { revalidate: 60 }, // Revalida o cache a cada 60 segundos
-      },
+      { next: { revalidate: 60 } },
     );
     if (!res.ok) return [];
     const data = await res.json();
@@ -24,11 +23,10 @@ async function getFeaturedProducts() {
   }
 }
 
-// Busca as categorias ativas
 async function getCategories() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`, {
-      next: { revalidate: 300 }, // Cache de 5 minutos para categorias
+      next: { revalidate: 300 },
     });
     if (!res.ok) return [];
     const data = await res.json();
@@ -38,13 +36,99 @@ async function getCategories() {
   }
 }
 
-// Página inicial da loja
-export default async function HomePage() {
-  // Busca os dados em paralelo para melhor performance
-  const [featuredProducts, categories] = await Promise.all([
-    getFeaturedProducts(),
-    getCategories(),
-  ]);
+// =================== SEÇÕES COM STREAMING (SUSPENSE) ===================
+
+// Componente Wrapper para Produtos em Destaque
+async function FeaturedProductsSection() {
+  const featuredProducts = await getFeaturedProducts();
+
+  if (featuredProducts.length === 0) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        <p>Nenhum produto em destaque no momento.</p>
+        <Button variant="outline" className="mt-4" asChild>
+          <Link href="/products">Ver todos os produtos</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {featuredProducts.map((product: any) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+
+// Fallback de Loading para Produtos
+function FeaturedProductsSkeleton() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
+// Componente Wrapper para Categorias
+async function CategoriesSection() {
+  const categories = await getCategories();
+
+  if (categories.length === 0) return null;
+
+  return (
+    <section className="py-16 px-4">
+      <div className="container mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold">Categorias</h2>
+          <Button variant="ghost" asChild>
+            <Link href="/products">Ver tudo <ArrowRight className="ml-1 h-4 w-4" /></Link>
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {categories.slice(0, 6).map((category: any) => (
+            <Link
+              key={category.id}
+              href={`/products?categoryId=${category.id}`}
+              className="group flex flex-col items-center gap-2 p-4 rounded-lg border bg-card hover:bg-accent transition-colors text-center"
+            >
+              <span className="font-medium text-sm group-hover:text-primary transition-colors">
+                {category.name}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CategoriesSkeleton() {
+  return (
+    <section className="py-16 px-4">
+      <div className="container mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div className="h-8 w-32 bg-muted animate-pulse rounded" />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
+// =================== PÁGINA PRINCIPAL ===================
+
+export default function HomePage() {
+  // Removido o Promise.all() bloqueante. Agora o Hero carrega instantaneamente
+  // e as outras seções usam Streaming via Suspense.
 
   return (
     <div>
@@ -59,7 +143,6 @@ export default async function HomePage() {
             Descubra nossa coleção exclusiva de produtos selecionados com cuidado.
             Entrega rápida e garantia em todos os itens.
           </p>
-          {/* CTAs do hero */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
               <Link href="/products">
@@ -88,58 +171,21 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {featuredProducts.length > 0 ? (
-            // Grade de produtos em destaque
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {featuredProducts.map((product: any) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            // Estado quando não há produtos em destaque
-            <div className="text-center py-12 text-muted-foreground">
-              <p>Nenhum produto em destaque no momento.</p>
-              <Button variant="outline" className="mt-4" asChild>
-                <Link href="/products">Ver todos os produtos</Link>
-              </Button>
-            </div>
-          )}
+          <Suspense fallback={<FeaturedProductsSkeleton />}>
+            <FeaturedProductsSection />
+          </Suspense>
         </div>
       </section>
 
       {/* ==================== CATEGORIAS ==================== */}
-      {categories.length > 0 && (
-        <section className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">Categorias</h2>
-              <Button variant="ghost" asChild>
-                <Link href="/products">Ver tudo <ArrowRight className="ml-1 h-4 w-4" /></Link>
-              </Button>
-            </div>
-            {/* Grade de categorias */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {categories.slice(0, 6).map((category: any) => (
-                <Link
-                  key={category.id}
-                  href={`/products?categoryId=${category.id}`}
-                  className="group flex flex-col items-center gap-2 p-4 rounded-lg border bg-card hover:bg-accent transition-colors text-center"
-                >
-                  <span className="font-medium text-sm group-hover:text-primary transition-colors">
-                    {category.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      <Suspense fallback={<CategoriesSkeleton />}>
+        <CategoriesSection />
+      </Suspense>
 
       {/* ==================== DIFERENCIAIS ==================== */}
       <section className="py-12 px-4 border-y bg-muted/30">
         <div className="container mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {/* Card de diferencial: Frete Grátis */}
             <div className="flex flex-col items-center text-center gap-3">
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                 <Truck className="h-6 w-6 text-primary" />
@@ -149,8 +195,6 @@ export default async function HomePage() {
                 <p className="text-xs text-muted-foreground">Acima de R$ 200</p>
               </div>
             </div>
-
-            {/* Pagamento Seguro */}
             <div className="flex flex-col items-center text-center gap-3">
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                 <Shield className="h-6 w-6 text-primary" />
@@ -160,8 +204,6 @@ export default async function HomePage() {
                 <p className="text-xs text-muted-foreground">Dados criptografados</p>
               </div>
             </div>
-
-            {/* Troca Garantida */}
             <div className="flex flex-col items-center text-center gap-3">
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                 <RefreshCw className="h-6 w-6 text-primary" />
@@ -171,8 +213,6 @@ export default async function HomePage() {
                 <p className="text-xs text-muted-foreground">Até 30 dias</p>
               </div>
             </div>
-
-            {/* Suporte */}
             <div className="flex flex-col items-center text-center gap-3">
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                 <Headphones className="h-6 w-6 text-primary" />

@@ -113,6 +113,7 @@ export function ProductCard({ product }: ProductCardProps) {
             size="icon"
             className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
             onClick={handleAddToWishlist}
+            aria-label="Adicionar à lista de desejos"
           >
             <Heart className="h-4 w-4" />
           </Button>
@@ -151,8 +152,9 @@ export function ProductCard({ product }: ProductCardProps) {
             className="w-full"
             onClick={handleAddToCart}
             disabled={isOutOfStock || isLoading}
+            aria-label={`Adicionar ${product.name} ao carrinho`}
           >
-            <ShoppingCart className="h-3 w-3 mr-1" />
+            <ShoppingCart className="h-3 w-3 mr-1" aria-hidden="true" />
             {isOutOfStock ? 'Indisponível' : 'Adicionar'}
           </Button>
         </div>
