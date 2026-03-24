@@ -8,7 +8,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import {
   Order,
   OrderStatus,
@@ -22,6 +22,7 @@ import { ProductsService } from '../products/products.service';
 import { EmailService } from '../email/email.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { User } from '../users/entities/user.entity';
+import { Product } from '../products/entities/product.entity';
 
 @Injectable()
 export class OrdersService {
@@ -36,23 +37,22 @@ export class OrdersService {
     private cartService: CartService,
     // Serviço de cupons para validar e aplicar descontos
     private couponsService: CouponsService,
-    // Serviço de produtos para atualizar estoque
+    // Serviço de produtos para ler dados caso precise
     private productsService: ProductsService,
     // Serviço de e-mail para enviar confirmações
     private emailService: EmailService,
+    // Conexão com o banco de dados para gerenciar transações
+    private dataSource: DataSource,
   ) {}
 
-  // Cria um pedido a partir do carrinho do usuário (processo de checkout)
+  // Cria um pedido a partir do carrinho do usuário (processo de checkout) utilizando Transaction para consistência e Locks para prevenir Race Conditions
   async create(user: User, createOrderDto: CreateOrderDto): Promise<Order> {
-    // Obtém o carrinho atual do usuário com todos os itens
     const cart = await this.cartService.getCart(user.id);
 
-    // Valida que o carrinho não está vazio
     if (!cart.items || cart.items.length === 0) {
       throw new BadRequestException('O carrinho está vazio');
     }
 
-    // Calcula o subtotal do pedido (soma dos preços × quantidades)
     const subtotal = cart.items.reduce(
       (sum, item) => sum + Number(item.product.price) * item.quantity,
       0,
@@ -61,7 +61,6 @@ export class OrdersService {
     let discountAmount = 0;
     let couponId: string | undefined = undefined;
 
-    // Aplica cupom de desconto se fornecido
     if (createOrderDto.couponCode) {
       const coupon = await this.couponsService.validate(
         createOrderDto.couponCode,
@@ -74,79 +73,101 @@ export class OrdersService {
       );
     }
 
-    // Aplica desconto de 5% para pagamento via PIX
     if (createOrderDto.paymentMethod === PaymentMethod.PIX) {
       const pixDiscount = Math.round(subtotal * 0.05 * 100) / 100;
       discountAmount = Math.round((discountAmount + pixDiscount) * 100) / 100;
     }
 
-    // Calcula o frete (simulado — em produção integraria com API de frete)
-    const shippingCost = subtotal > 200 ? 0 : 19.9; // Frete grátis acima de R$ 200
-
-    // Calcula o total final: subtotal - desconto + frete
+    const shippingCost = subtotal > 200 ? 0 : 19.9;
     const total = subtotal - discountAmount + shippingCost;
-
-    // Gera um número de pedido único e legível (ex: ORD-20240315-000001)
     const orderNumber = await this.generateOrderNumber();
 
-    // Cria a entidade do pedido com todos os dados calculados
-    const order: any = this.ordersRepository.create({
-      orderNumber,
-      userId: user.id,
-      paymentMethod: createOrderDto.paymentMethod,
-      shippingAddress: createOrderDto.shippingAddress,
-      notes: createOrderDto.notes,
-      subtotal,
-      discountAmount,
-      shippingCost,
-      total,
-      couponId,
-      // Simula pagamento confirmado (em produção integraria com gateway)
-      paymentStatus: PaymentStatus.PAID,
-    });
+    // ================= Transação do Banco de Dados ================= //
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    // Salva o pedido no banco para obter o ID
-    const savedOrder = await this.ordersRepository.save(order);
+    let savedOrder;
 
-    // Cria os itens do pedido como snapshot dos produtos (para histórico imutável)
-    const orderItems = cart.items.map((cartItem) =>
-      this.orderItemsRepository.create({
-        orderId: savedOrder.id,
-        productId: cartItem.productId,
-        productName: cartItem.product.name, // Snapshot do nome atual
-        productImage: cartItem.product.imageUrl, // Snapshot da imagem atual
-        unitPrice: cartItem.product.price, // Snapshot do preço atual
-        quantity: cartItem.quantity,
-        total: Number(cartItem.product.price) * cartItem.quantity,
-      }),
-    );
+    try {
+      // 1. Validar e Lockar os Produtos (Pessimistic Write)
+      // Buscamos todos os produtos do carrinho de forma transacional e impedimos outras transações de modificá-los até concluirmos.
+      const productIds = cart.items.map((i) => i.productId);
+      const lockedProducts = await queryRunner.manager.find(Product, {
+        where: { id: In(productIds) },
+        lock: { mode: 'pessimistic_write' },
+      });
 
-    // Salva todos os itens do pedido
-    await this.orderItemsRepository.save(orderItems);
+      // Validações de Estoque Batch
+      for (const cartItem of cart.items) {
+        const product = lockedProducts.find((p) => p.id === cartItem.productId);
+        if (!product) {
+          throw new NotFoundException(`Produto com ID ${cartItem.productId} não encontrado.`);
+        }
+        if (product.stock < cartItem.quantity) {
+          throw new BadRequestException(`Estoque insuficiente para o produto: ${product.name}`);
+        }
+        // Subtrai da entidade lockada em runtime
+        product.stock -= cartItem.quantity;
+      }
 
-    // Atualiza o estoque de cada produto vendido
-    for (const cartItem of cart.items) {
-      await this.productsService.updateStock(
-        cartItem.productId,
-        cartItem.quantity,
+      // Salva a alteração de estoque dos produtos de uma só vez (batch save resolves N+1)
+      await queryRunner.manager.save(Product, lockedProducts);
+
+      // 2. Criar a Ordem Base
+      const order: any = this.ordersRepository.create({
+        orderNumber,
+        userId: user.id,
+        paymentMethod: createOrderDto.paymentMethod,
+        shippingAddress: createOrderDto.shippingAddress,
+        notes: createOrderDto.notes,
+        subtotal,
+        discountAmount,
+        shippingCost,
+        total,
+        couponId,
+        paymentStatus: PaymentStatus.PAID,
+      });
+
+      savedOrder = await queryRunner.manager.save(Order, order);
+
+      // 3. Criar Itens do Pedido Base (Snapshot)
+      const orderItems = cart.items.map((cartItem) =>
+        this.orderItemsRepository.create({
+          orderId: savedOrder.id,
+          productId: cartItem.productId,
+          productName: cartItem.product.name,
+          productImage: cartItem.product.imageUrl,
+          unitPrice: cartItem.product.price,
+          quantity: cartItem.quantity,
+          total: Number(cartItem.product.price) * cartItem.quantity,
+        }),
       );
+
+      await queryRunner.manager.save(OrderItem, orderItems);
+
+      // 4. Concluir transação para certificar integridade
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // Em caso de falha em estoque nulo, bad request, ou falha no banco
+      await queryRunner.rollbackTransaction();
+      throw err; // Re-lança o erro (BadRequest, NotFound, etc) para a API responder
+    } finally {
+      await queryRunner.release(); // Libera conexão
     }
 
-    // Incrementa o contador de uso do cupom se foi usado
+    // ================= Fim da Transação ================= //
+
+    // Rotinas externas à transação de Integridade
     if (couponId) {
       await this.couponsService.incrementUsage(couponId);
     }
-
-    // Esvazia o carrinho após a criação bem-sucedida do pedido
     await this.cartService.clearCart(user.id);
 
-    // Busca o pedido completo com todas as relações para retornar ao cliente
+    // Recupera a visibilidade integral das relacões (Items, Product, etc)
     const fullOrder = await this.findOne(savedOrder.id, user.id);
 
-    // Envia e-mail de confirmação de forma assíncrona (não bloqueia a resposta)
-    this.emailService.sendOrderConfirmation(user, fullOrder).catch(() => {
-      // Ignora erros de e-mail para não afetar o fluxo do pedido
-    });
+    this.emailService.sendOrderConfirmation(user, fullOrder).catch(() => {});
 
     return fullOrder;
   }

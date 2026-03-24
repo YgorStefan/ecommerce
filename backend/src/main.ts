@@ -8,6 +8,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 async function bootstrap() {
@@ -19,6 +20,9 @@ async function bootstrap() {
 
   // Define o prefixo global para todas as rotas da API
   app.setGlobalPrefix('api');
+
+  // Adiciona cookie parser
+  app.use(cookieParser());
 
   // Adiciona proteção de headers HTTP com Helmet
   app.use(helmet({

@@ -33,18 +33,15 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const response = await authService.login({ email, password });
-          const { user, accessToken, refreshToken } = response.data.data;
+          const { user } = response.data.data ? response.data.data : response.data;
 
-          // Salva os tokens no localStorage para uso pelo interceptor do Axios
-          localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', refreshToken);
+          // Apenas mantemos referência do ID. Tokens vão pros cookies!
           localStorage.setItem('userId', user.id);
 
-          // Atualiza o estado global com o usuário autenticado
           set({ user, isAuthenticated: true, isLoading: false });
         } catch (error) {
           set({ isLoading: false });
-          throw error; // Re-lança para o componente tratar e exibir o erro
+          throw error;
         }
       },
 
@@ -53,10 +50,8 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const response = await authService.register(data);
-          const { user, accessToken, refreshToken } = response.data.data;
+          const { user } = response.data.data ? response.data.data : response.data;
 
-          localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', refreshToken);
           localStorage.setItem('userId', user.id);
 
           set({ user, isAuthenticated: true, isLoading: false });
@@ -74,9 +69,6 @@ export const useAuthStore = create<AuthState>()(
           // Ignora erros de rede no logout para garantir que a sessão seja limpa
         }
 
-        // Remove todos os dados de sessão do localStorage
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         localStorage.removeItem('userId');
 
         set({ user: null, isAuthenticated: false });
@@ -87,8 +79,6 @@ export const useAuthStore = create<AuthState>()(
 
       // Limpa completamente o estado de autenticação
       clearAuth: () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         localStorage.removeItem('userId');
         set({ user: null, isAuthenticated: false });
       },
