@@ -47,3 +47,6 @@ postgres_data/
 frontend/public/robots.txt
 frontend/public/sitemap.xml
 frontend/public/sitemap-*.xml
+
+# GSD
+.planning/
