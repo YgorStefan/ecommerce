@@ -1,4 +1,3 @@
-// product-card.tsx
 // Card de exibição de produto na grade de listagem
 
 'use client';

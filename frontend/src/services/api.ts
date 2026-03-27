@@ -1,4 +1,3 @@
-// services/api.ts
 // Instância configurada do Axios com interceptors para autenticação automática
 
 import axios, { AxiosError } from 'axios';
@@ -33,7 +32,7 @@ api.interceptors.response.use(
 
       try {
         const userId = localStorage.getItem('userId');
-        
+
         // As long as we have internal user concept, attempt to hit refresh.
         // O refreshToken real estará embutido no Cookie
         if (userId) {
@@ -56,7 +55,7 @@ api.interceptors.response.use(
   },
 );
 
-// ==================== SERVIÇOS DA API ====================
+// SERVIÇOS DA API
 
 // Serviço de autenticação
 export const authService = {

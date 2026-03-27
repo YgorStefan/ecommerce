@@ -8,8 +8,6 @@ export function BackButton() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Se estivermos na home, não exibimos o botão voltar, 
-  // pois não há uma página anterior coerente no contexto da tela inicial
   if (pathname === '/') {
     return null;
   }

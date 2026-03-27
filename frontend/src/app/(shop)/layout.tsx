@@ -1,4 +1,3 @@
-// (shop)/layout.tsx
 // Layout da área da loja — inclui o Header, Footer e CartDrawer
 
 import { Header } from '@/components/layout/header';

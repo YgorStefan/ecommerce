@@ -1,4 +1,3 @@
-// admin/products/page.tsx
 // Painel admin — gestão completa de produtos com CRUD
 
 'use client';
@@ -193,7 +192,7 @@ export default function AdminProductsPage() {
         </Button>
       </div>
 
-      {/* ==================== FORMULÁRIO DE PRODUTO ==================== */}
+      {/*  FORMULÁRIO DE PRODUTO  */}
       {isFormOpen && (
         <Card>
           <CardHeader>
@@ -325,7 +324,7 @@ export default function AdminProductsPage() {
         </Card>
       )}
 
-      {/* ==================== TABELA DE PRODUTOS ==================== */}
+      {/*  TABELA DE PRODUTOS  */}
       <Card>
         <CardContent className="pt-6">
           {/* Barra de busca */}
@@ -388,11 +387,10 @@ export default function AdminProductsPage() {
                         </span>
                       </td>
                       <td className="p-3 text-center">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          product.isActive
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${product.isActive
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                          }`}>
                           {product.isActive ? 'Ativo' : 'Inativo'}
                         </span>
                       </td>

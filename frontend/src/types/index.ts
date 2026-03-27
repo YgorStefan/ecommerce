@@ -1,4 +1,3 @@
-// types/index.ts
 // Interfaces TypeScript que espelham as entidades do backend
 
 // Papel do usuário no sistema

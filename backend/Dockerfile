@@ -2,7 +2,6 @@
 # Build multi-stage: compila o TypeScript e gera apenas o necessário na imagem final.
 # By design, apenas a pasta dist/ e as prod dependencies vão para a imagem de produção.
 
-# ==================== STAGE 1: BUILDER ====================
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -20,7 +19,6 @@ COPY . .
 # Compila TypeScript → JavaScript
 RUN npm run build
 
-# ==================== STAGE 2: PRODUÇÃO ====================
 FROM node:20-alpine AS production
 
 # Roda como usuário não-root por segurança — boa prática obrigatória em produção
@@ -43,11 +41,11 @@ RUN mkdir -p uploads/products && chown -R appuser:appgroup /app
 # Muda para o usuário não-root antes de iniciar o processo
 USER appuser
 
-# Documenta a porta exposta (não publica — isso é responsabilidade do docker-compose)
+# Documenta a porta exposta
 EXPOSE 3001
 
 # ARG recebida do docker-compose build args — usada apenas como label de rastreabilidade,
-# não invalida a layer de npm ci (que é o que queremos preservar em cache)
+# não invalida a layer de npm ci
 ARG BUILD_DATE=unknown
 ARG GIT_HASH=unknown
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \

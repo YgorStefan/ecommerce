@@ -1,4 +1,3 @@
-// admin/coupons/page.tsx
 // Painel admin — criação e gestão de cupons de desconto
 
 'use client';
@@ -282,8 +281,8 @@ export default function AdminCouponsPage() {
                   {createMutation.isPending || updateMutation.isPending
                     ? 'Salvando...'
                     : editingCoupon
-                    ? 'Atualizar'
-                    : 'Criar Cupom'}
+                      ? 'Atualizar'
+                      : 'Criar Cupom'}
                 </Button>
                 <Button type="button" variant="outline" onClick={closeForm}>
                   Cancelar
@@ -338,11 +337,10 @@ export default function AdminCouponsPage() {
                         {coupon.validUntil ? `Até ${formatDate(coupon.validUntil)}` : 'Sem limite'}
                       </td>
                       <td className="p-3 text-center">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          coupon.isActive
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${coupon.isActive
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
-                        }`}>
+                          }`}>
                           {coupon.isActive ? 'Ativo' : 'Inativo'}
                         </span>
                       </td>

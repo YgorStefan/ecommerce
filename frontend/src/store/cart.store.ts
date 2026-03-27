@@ -1,4 +1,3 @@
-// cart.store.ts
 // Store Zustand para gerenciamento global do carrinho de compras
 
 import { create } from 'zustand';

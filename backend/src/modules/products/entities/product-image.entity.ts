@@ -1,4 +1,3 @@
-// product-image.entity.ts
 // Define a entidade ProductImage — cada produto pode ter múltiplas imagens
 
 import {
@@ -29,7 +28,7 @@ export class ProductImage {
   @Column({ nullable: true, length: 200 })
   alt: string;
 
-  // Ordem de exibição das imagens (a principal tem posição 0)
+  // Ordem de exibição das imagens
   @ApiProperty({ description: 'Ordem de exibição da imagem' })
   @Column({ default: 0 })
   position: number;

@@ -1,6 +1,3 @@
-// footer.tsx
-// Rodapé da loja com links e informações
-
 import Link from 'next/link';
 import { Package } from 'lucide-react';
 

@@ -1,4 +1,3 @@
-// input.tsx
 // Componente Input reutilizável com estilização consistente
 
 import * as React from 'react';

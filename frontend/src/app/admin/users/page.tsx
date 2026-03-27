@@ -1,4 +1,3 @@
-// admin/users/page.tsx
 // Painel admin — gestão de usuários
 
 'use client';
@@ -89,20 +88,18 @@ export default function AdminUsersPage() {
                       <td className="p-3 font-medium">{user.name}</td>
                       <td className="p-3 text-muted-foreground">{user.email}</td>
                       <td className="p-3 text-center">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          user.role === 'admin'
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${user.role === 'admin'
                             ? 'bg-purple-100 text-purple-800'
                             : 'bg-gray-100 text-gray-800'
-                        }`}>
+                          }`}>
                           {user.role === 'admin' ? 'Admin' : 'Cliente'}
                         </span>
                       </td>
                       <td className="p-3 text-center">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          user.isActive
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${user.isActive
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
-                        }`}>
+                          }`}>
                           {user.isActive ? 'Ativo' : 'Inativo'}
                         </span>
                       </td>

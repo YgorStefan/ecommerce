@@ -1,4 +1,3 @@
-// coupons.service.ts
 // Serviço que gerencia criação, validação e aplicação de cupons de desconto
 
 import {
@@ -19,7 +18,7 @@ export class CouponsService {
     // Repositório TypeORM para operações na tabela coupons
     @InjectRepository(Coupon)
     private couponsRepository: Repository<Coupon>,
-  ) {}
+  ) { }
 
   // Cria um novo cupom de desconto
   async create(createCouponDto: CreateCouponDto): Promise<Coupon> {
@@ -27,7 +26,7 @@ export class CouponsService {
     return this.couponsRepository.save(coupon);
   }
 
-  // Lista todos os cupons (para o painel admin)
+  // Lista todos os cupons
   async findAll(): Promise<Coupon[]> {
     return this.couponsRepository.find({
       order: { createdAt: 'DESC' },
@@ -45,7 +44,7 @@ export class CouponsService {
 
   // Valida um cupom e retorna o objeto se for válido
   async validate(code: string, orderSubtotal: number): Promise<Coupon> {
-    // Busca o cupom pelo código (converte para maiúsculas para padronizar)
+    // Busca o cupom pelo código
     const coupon = await this.couponsRepository.findOne({
       where: { code: code.toUpperCase(), isActive: true },
     });

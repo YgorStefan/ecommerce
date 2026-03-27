@@ -1,4 +1,3 @@
-// category.entity.ts
 // Define a entidade Category (categoria de produtos) no banco de dados
 
 import {

@@ -1,4 +1,3 @@
-// wishlist.module.ts
 // Módulo da lista de desejos
 
 import { Module } from '@nestjs/common';
@@ -13,4 +12,4 @@ import { Product } from '../products/entities/product.entity';
   controllers: [WishlistController],
   providers: [WishlistService],
 })
-export class WishlistModule {}
+export class WishlistModule { }

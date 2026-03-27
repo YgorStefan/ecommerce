@@ -1,4 +1,3 @@
-// products/[slug]/page.tsx
 // Página de detalhe do produto com galeria, avaliações e ações
 
 'use client';
@@ -132,8 +131,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const allImages = product.images?.length > 0
     ? product.images.map((img: any) => img.url)
     : product.imageUrl
-    ? [product.imageUrl]
-    : [];
+      ? [product.imageUrl]
+      : [];
 
   const currentImage = allImages[selectedImageIndex];
   const isOutOfStock = product.stock <= 0;
@@ -142,7 +141,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     <div className="container mx-auto px-4 py-8">
       {/* Grade principal produto: imagem + detalhes */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
-        {/* ==================== GALERIA DE IMAGENS ==================== */}
+        {/*  GALERIA DE IMAGENS  */}
         <div className="space-y-4">
           {/* Imagem principal */}
           <div className="relative aspect-square rounded-lg overflow-hidden bg-muted">
@@ -188,9 +187,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 <button
                   key={idx}
                   onClick={() => setSelectedImageIndex(idx)}
-                  className={`relative h-16 w-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition-colors ${
-                    idx === selectedImageIndex ? 'border-primary' : 'border-transparent'
-                  }`}
+                  className={`relative h-16 w-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition-colors ${idx === selectedImageIndex ? 'border-primary' : 'border-transparent'
+                    }`}
                 >
                   <Image src={url} alt="" fill className="object-cover" />
                 </button>
@@ -199,7 +197,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           )}
         </div>
 
-        {/* ==================== DETALHES DO PRODUTO ==================== */}
+        {/*  DETALHES DO PRODUTO  */}
         <div className="space-y-6">
           {/* Categoria */}
           {product.category && (
@@ -216,11 +214,10 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
-                    className={`h-4 w-4 ${
-                      i < Math.round(Number(product.averageRating))
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-muted-foreground'
-                    }`}
+                    className={`h-4 w-4 ${i < Math.round(Number(product.averageRating))
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'text-muted-foreground'
+                      }`}
                   />
                 ))}
               </div>
@@ -306,7 +303,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         </div>
       </div>
 
-      {/* ==================== SEÇÃO DE AVALIAÇÕES ==================== */}
+      {/*  SEÇÃO DE AVALIAÇÕES  */}
       <div className="border-t pt-12">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">Avaliações dos Clientes</h2>
@@ -334,11 +331,10 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                   className="focus:outline-none"
                 >
                   <Star
-                    className={`h-6 w-6 ${
-                      i < reviewRating
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-muted-foreground'
-                    }`}
+                    className={`h-6 w-6 ${i < reviewRating
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'text-muted-foreground'
+                      }`}
                   />
                 </button>
               ))}
@@ -396,11 +392,10 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                           {Array.from({ length: 5 }).map((_, i) => (
                             <Star
                               key={i}
-                              className={`h-3 w-3 ${
-                                i < review.rating
-                                  ? 'fill-yellow-400 text-yellow-400'
-                                  : 'text-muted-foreground'
-                              }`}
+                              className={`h-3 w-3 ${i < review.rating
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-muted-foreground'
+                                }`}
                             />
                           ))}
                         </div>

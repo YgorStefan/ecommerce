@@ -1,5 +1,4 @@
-// product.entity.ts
-// Define a entidade Product (produto) com todas as suas relações
+// Define a entidade Product com todas as suas relações
 
 import {
   Entity,
@@ -29,7 +28,7 @@ export class Product {
   @Column({ length: 200 })
   name: string;
 
-  // Slug para URLs amigáveis (ex: camiseta-branca-basica)
+  // Slug para URLs amigáveis
   @ApiProperty({ description: 'Slug para URL amigável' })
   @Column({ unique: true, length: 220 })
   slug: string;
@@ -44,7 +43,7 @@ export class Product {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
-  // Preço original para mostrar desconto (opcional)
+  // Preço original para mostrar desconto
   @ApiProperty({
     description: 'Preço original (para mostrar desconto)',
     required: false,
@@ -77,12 +76,12 @@ export class Product {
   @Column({ default: false })
   isFeatured: boolean;
 
-  // Peso do produto em gramas (para cálculo de frete)
+  // Peso do produto em gramas
   @ApiProperty({ description: 'Peso em gramas', required: false })
   @Column({ nullable: true })
   weight: number;
 
-  // Relação ManyToOne: muitos produtos pertencem a uma categoria
+  // Muitos produtos pertencem a uma categoria
   @ApiProperty({ description: 'Categoria do produto' })
   @ManyToOne(() => Category, { eager: true, nullable: true })
   @JoinColumn({ name: 'categoryId' })

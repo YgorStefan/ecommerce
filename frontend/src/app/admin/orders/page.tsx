@@ -1,4 +1,3 @@
-// admin/orders/page.tsx
 // Painel admin — gestão e atualização de status de pedidos
 
 'use client';

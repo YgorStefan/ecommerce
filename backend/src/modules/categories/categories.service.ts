@@ -1,4 +1,3 @@
-// categories.service.ts
 // Serviço que gerencia as categorias de produtos
 
 import {
@@ -30,7 +29,7 @@ export class CategoriesService {
     // Repositório TypeORM para operações na tabela categories
     @InjectRepository(Category)
     private categoriesRepository: Repository<Category>,
-  ) {}
+  ) { }
 
   // Retorna todas as categorias ativas para exibição na loja
   async findAll(includeInactive = false): Promise<Category[]> {
@@ -50,7 +49,7 @@ export class CategoriesService {
     return category;
   }
 
-  // Busca uma categoria pelo slug (para URLs amigáveis)
+  // Busca uma categoria pelo slug
   async findBySlug(slug: string): Promise<Category> {
     const category = await this.categoriesRepository.findOne({
       where: { slug },
@@ -67,10 +66,10 @@ export class CategoriesService {
     const slug = slugify(createCategoryDto.name, {
       lower: true, // Converte para minúsculas
       strict: true, // Remove caracteres especiais
-      locale: 'pt', // Trata caracteres do português (ç, ã, etc.)
+      locale: 'pt', // Trata caracteres do português
     });
 
-    // Verifica se já existe uma categoria com o mesmo nome/slug
+    // Verifica se já existe uma categoria com o mesmo nome
     const existing = await this.categoriesRepository.findOne({
       where: { slug },
     });

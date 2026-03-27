@@ -1,4 +1,3 @@
-// reviews.service.ts
 // Serviço que gerencia avaliações de produtos
 
 import {
@@ -24,7 +23,7 @@ export class ReviewsService {
     // Repositório dos produtos para atualizar a média de avaliações
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
-  ) {}
+  ) { }
 
   // Cria uma avaliação para um produto
   async create(

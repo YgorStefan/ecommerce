@@ -1,98 +1,135 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# E-commerce Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST do e-commerce construída com [NestJS](https://nestjs.com/) e TypeScript.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tecnologias
 
-## Description
+- **NestJS** — framework Node.js
+- **TypeORM** — ORM com suporte a migrations
+- **PostgreSQL** — banco de dados relacional
+- **JWT** — autenticação com access + refresh token
+- **Swagger** — documentação automática da API (`/api`)
+- **Nodemailer** — envio de e-mails transacionais
+- **Multer** — upload de imagens
+- **Correios Brasil** — cálculo de frete
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Módulos
 
-## Project setup
+| Módulo | Descrição |
+|---|---|
+| `auth` | Registro, login, refresh token e JWT |
+| `users` | Gerenciamento de usuários |
+| `products` | Produtos com imagens, estoque e slugs |
+| `categories` | Categorias de produtos |
+| `cart` | Carrinho de compras por usuário |
+| `orders` | Pedidos e itens de pedido |
+| `coupons` | Cupons de desconto |
+| `reviews` | Avaliações de produtos |
+| `wishlist` | Lista de desejos |
+| `shipping` | Cálculo de frete via Correios |
+| `email` | Envio de e-mails com templates Handlebars |
 
-```bash
-$ npm install
-```
-
-## Compile and run the project
+## Instalação
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+## Variáveis de ambiente
+
+Copie o arquivo de exemplo e preencha com seus valores:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp ../.env.example .env
 ```
 
-## Deployment
+Variáveis necessárias:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+| Variável | Descrição |
+|---|---|
+| `DB_HOST` | Host do PostgreSQL |
+| `DB_PORT` | Porta do PostgreSQL (padrão: `5432`) |
+| `DB_USER` | Usuário do banco |
+| `DB_PASSWORD` | Senha do banco |
+| `DB_NAME` | Nome do banco de dados |
+| `BACKEND_PORT` | Porta da API (padrão: `3001`) |
+| `JWT_ACCESS_SECRET` | Segredo do access token |
+| `JWT_REFRESH_SECRET` | Segredo do refresh token |
+| `JWT_ACCESS_EXPIRES_IN` | Expiração do access token (ex: `15m`) |
+| `JWT_REFRESH_EXPIRES_IN` | Expiração do refresh token (ex: `7d`) |
+| `FRONTEND_URL` | URL do frontend (para CORS e e-mails) |
+| `MAIL_HOST` | Servidor SMTP |
+| `MAIL_PORT` | Porta SMTP |
+| `MAIL_USER` | Usuário do e-mail |
+| `MAIL_PASSWORD` | Senha ou app password |
+| `MAIL_FROM` | Remetente padrão |
+| `UPLOAD_DEST` | Pasta de uploads (padrão: `./uploads`) |
+| `MAX_FILE_SIZE` | Tamanho máximo de arquivo em bytes |
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Executar o projeto
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# desenvolvimento com hot reload
+npm run start:dev
+
+# produção
+npm run start:prod
+
+# modo debug
+npm run start:debug
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Migrations
 
-## Resources
+```bash
+# gerar migration a partir das entidades
+npm run migration:generate
 
-Check out a few resources that may come in handy when working with NestJS:
+# executar migrations pendentes
+npm run migration:run
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# reverter última migration
+npm run migration:revert
+```
 
-## Support
+## Testes
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# testes unitários
+npm run test
 
-## Stay in touch
+# testes em modo watch
+npm run test:watch
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# cobertura de testes
+npm run test:cov
 
-## License
+# testes e2e
+npm run test:e2e
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Documentação da API
+
+Com o servidor rodando, acesse:
+
+```
+http://localhost:3001/api
+```
+
+## Docker
+
+Build e execução isolada do backend:
+
+```bash
+docker build -t ecommerce-backend .
+docker run -p 3001:3001 --env-file .env ecommerce-backend
+```
+
+Para subir toda a stack (backend + frontend + banco), use o `docker-compose` na raiz do projeto.
+
+## Lint e formatação
+
+```bash
+npm run lint
+npm run format
+```

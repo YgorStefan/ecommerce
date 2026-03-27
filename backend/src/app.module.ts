@@ -1,5 +1,4 @@
-// app.module.ts
-// Módulo raiz da aplicação — importa todos os outros módulos
+// Módulo raiz da aplicação
 
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -81,4 +80,4 @@ import { ShippingModule } from './modules/shipping/shipping.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

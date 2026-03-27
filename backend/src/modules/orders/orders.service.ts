@@ -1,4 +1,3 @@
-// orders.service.ts
 // Serviço de pedidos — gerencia o checkout, atualização de status e histórico
 
 import {
@@ -43,9 +42,9 @@ export class OrdersService {
     private emailService: EmailService,
     // Conexão com o banco de dados para gerenciar transações
     private dataSource: DataSource,
-  ) {}
+  ) { }
 
-  // Cria um pedido a partir do carrinho do usuário (processo de checkout) utilizando Transaction para consistência e Locks para prevenir Race Conditions
+  // Cria um pedido a partir do carrinho do usuário utilizando Transaction para consistência e Locks para prevenir Race Conditions
   async create(user: User, createOrderDto: CreateOrderDto): Promise<Order> {
     const cart = await this.cartService.getCart(user.id);
 
@@ -82,7 +81,7 @@ export class OrdersService {
     const total = subtotal - discountAmount + shippingCost;
     const orderNumber = await this.generateOrderNumber();
 
-    // ================= Transação do Banco de Dados ================= //
+    // Transação do Banco de Dados
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -90,7 +89,7 @@ export class OrdersService {
     let savedOrder;
 
     try {
-      // 1. Validar e Lockar os Produtos (Pessimistic Write)
+      // Validar e Lockar os Produtos (Pessimistic Write)
       // Buscamos todos os produtos do carrinho de forma transacional e impedimos outras transações de modificá-los até concluirmos.
       const productIds = cart.items.map((i) => i.productId);
       const lockedProducts = await queryRunner.manager.find(Product, {
@@ -114,7 +113,7 @@ export class OrdersService {
       // Salva a alteração de estoque dos produtos de uma só vez (batch save resolves N+1)
       await queryRunner.manager.save(Product, lockedProducts);
 
-      // 2. Criar a Ordem Base
+      // Criar a Ordem Base
       const order: any = this.ordersRepository.create({
         orderNumber,
         userId: user.id,
@@ -131,7 +130,7 @@ export class OrdersService {
 
       savedOrder = await queryRunner.manager.save(Order, order);
 
-      // 3. Criar Itens do Pedido Base (Snapshot)
+      // Criar Itens do Pedido Base
       const orderItems = cart.items.map((cartItem) =>
         this.orderItemsRepository.create({
           orderId: savedOrder.id,
@@ -146,7 +145,7 @@ export class OrdersService {
 
       await queryRunner.manager.save(OrderItem, orderItems);
 
-      // 4. Concluir transação para certificar integridade
+      // Concluir transação para certificar integridade
       await queryRunner.commitTransaction();
     } catch (err) {
       // Em caso de falha em estoque nulo, bad request, ou falha no banco
@@ -156,18 +155,16 @@ export class OrdersService {
       await queryRunner.release(); // Libera conexão
     }
 
-    // ================= Fim da Transação ================= //
-
     // Rotinas externas à transação de Integridade
     if (couponId) {
       await this.couponsService.incrementUsage(couponId);
     }
     await this.cartService.clearCart(user.id);
 
-    // Recupera a visibilidade integral das relacões (Items, Product, etc)
+    // Recupera a visibilidade integral das relacões
     const fullOrder = await this.findOne(savedOrder.id, user.id);
 
-    this.emailService.sendOrderConfirmation(user, fullOrder).catch(() => {});
+    this.emailService.sendOrderConfirmation(user, fullOrder).catch(() => { });
 
     return fullOrder;
   }
@@ -211,7 +208,7 @@ export class OrdersService {
     return order;
   }
 
-  // Lista todos os pedidos (para o painel admin) com paginação e filtros
+  // Lista todos os pedidos com paginação e filtros
   async findAll(page = 1, limit = 20, status?: OrderStatus) {
     const skip = (page - 1) * limit;
     const where = status ? { status } : {};
@@ -232,7 +229,7 @@ export class OrdersService {
     };
   }
 
-  // Atualiza o status de um pedido (apenas admin)
+  // Atualiza o status de um pedido
   async updateStatus(id: string, status: OrderStatus): Promise<Order> {
     const order = await this.findOne(id);
 
@@ -243,7 +240,7 @@ export class OrdersService {
     // Notifica o cliente sobre a mudança de status por e-mail
     this.emailService
       .sendOrderStatusUpdate(order.user, updatedOrder)
-      .catch(() => {});
+      .catch(() => { });
 
     return updatedOrder;
   }

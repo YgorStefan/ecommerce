@@ -1,5 +1,4 @@
-// auth.controller.ts
-// Controller de autenticação — expõe os endpoints de registro, login e tokens
+// expõe os endpoints de registro, login e tokens
 
 import {
   Controller,
@@ -31,7 +30,7 @@ import { User } from '../users/entities/user.entity';
 @Controller('auth')
 export class AuthController {
   // Injeta o serviço de autenticação
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   // POST /api/auth/register — cadastro de novo usuário
   @Post('register')
@@ -41,8 +40,8 @@ export class AuthController {
   async register(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) res: Response) {
     // Delega o processamento para o serviço de autenticação
     const result = await this.authService.register(registerDto);
-    res.cookie('accessToken', result.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
-    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+    res.cookie('accessToken', result.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 15 * 60 * 1000 });
+    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 7 * 24 * 60 * 60 * 1000 });
     return { user: result.user };
   }
 
@@ -54,20 +53,25 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
   async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.login(loginDto);
-    res.cookie('accessToken', result.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
-    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+    res.cookie('accessToken', result.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 15 * 60 * 1000 });
+    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 7 * 24 * 60 * 60 * 1000 });
     return { user: result.user };
   }
 
   // POST /api/auth/refresh — renova o access token usando o refresh token
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Renovar tokens de acesso' })
+  @ApiResponse({ status: 200, description: 'Tokens renovados com sucesso' })
+  @ApiResponse({ status: 401, description: 'Refresh token inválido ou ausente' })
   async refreshTokens(@Body() body: { userId: string }, @Req() req: any, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token missing');
     }
     const result = await this.authService.refreshTokens(body.userId, refreshToken);
-    res.cookie('accessToken', result.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
-    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+    res.cookie('accessToken', result.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 15 * 60 * 1000 });
+    res.cookie('refreshToken', result.refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 7 * 24 * 60 * 60 * 1000 });
     return { success: true };
   }
 

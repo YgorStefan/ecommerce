@@ -1,4 +1,3 @@
-// tailwind.config.ts
 // Configuração do Tailwind CSS com as customizações do design system
 
 import type { Config } from 'tailwindcss';

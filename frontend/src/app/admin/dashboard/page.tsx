@@ -1,4 +1,3 @@
-// admin/dashboard/page.tsx
 // Dashboard com métricas e KPIs do e-commerce
 
 'use client';
@@ -93,7 +92,7 @@ export default function AdminDashboardPage() {
         <p className="text-muted-foreground">Visão geral do seu e-commerce</p>
       </div>
 
-      {/* ==================== CARDS DE MÉTRICAS ==================== */}
+      {/*  CARDS DE MÉTRICAS  */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total de pedidos */}
         <MetricCard
@@ -125,7 +124,7 @@ export default function AdminDashboardPage() {
         />
       </div>
 
-      {/* ==================== GRÁFICO DE VENDAS ==================== */}
+      {/*  GRÁFICO DE VENDAS  */}
       <Card>
         <CardHeader>
           <CardTitle>Vendas por Mês</CardTitle>
@@ -154,7 +153,7 @@ export default function AdminDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* ==================== PEDIDOS RECENTES ==================== */}
+      {/*  PEDIDOS RECENTES  */}
       <Card>
         <CardHeader>
           <CardTitle>Pedidos Recentes</CardTitle>

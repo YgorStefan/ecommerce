@@ -1,4 +1,3 @@
-// (shop)/products/page.tsx
 // Página de listagem de produtos com filtros, busca e paginação
 
 'use client';
@@ -90,7 +89,7 @@ function ProductsContent() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* ==================== SIDEBAR DE FILTROS ==================== */}
+        {/*  SIDEBAR DE FILTROS  */}
         <aside className={`lg:w-64 flex-shrink-0 ${isFilterOpen ? 'block' : 'hidden lg:block'}`}>
           <div className="space-y-6 sticky top-24">
             {/* Título dos filtros */}
@@ -160,7 +159,7 @@ function ProductsContent() {
           </div>
         </aside>
 
-        {/* ==================== LISTAGEM PRINCIPAL ==================== */}
+        {/*  LISTAGEM PRINCIPAL  */}
         <div className="flex-1 min-w-0">
           {/* Barra de controles (busca, ordenação, filtro mobile) */}
           <div className="flex flex-col sm:flex-row gap-3 mb-6">

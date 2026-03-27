@@ -1,5 +1,4 @@
-// review.entity.ts
-// Define a entidade Review (avaliação de produto)
+// Define a entidade Review
 
 import {
   Entity,

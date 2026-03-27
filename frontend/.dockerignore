@@ -1,4 +1,3 @@
-# .dockerignore — Frontend Next.js
 # Evita que arquivos desnecessários sejam enviados ao contexto de build do Docker.
 # node_modules e .next são os maiores culpados pelo cache corrompido e build lento.
 

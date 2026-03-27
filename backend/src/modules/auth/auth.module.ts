@@ -1,4 +1,3 @@
-// auth.module.ts
 // Módulo de autenticação — configura JWT e registra as dependências do módulo
 
 import { Module } from '@nestjs/common';
@@ -45,4 +44,4 @@ import { EmailModule } from '../email/email.module';
   // Exporta o AuthService e PassportModule para uso em outros módulos
   exports: [AuthService, PassportModule, JwtModule],
 })
-export class AuthModule {}
+export class AuthModule { }

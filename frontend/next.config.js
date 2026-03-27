@@ -1,6 +1,3 @@
-// next.config.js
-// Configuração do Next.js
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Gera uma pasta standalone com apenas os arquivos necessários para produção
@@ -22,7 +19,7 @@ const nextConfig = {
       },
     ],
   },
-  
+
   // Configuração crítica para WSL2/Windows com Docker!
   // Como o sistema de arquivos do Windows não emite eventos nativos do Linux (inotify),
   // forçamos o Next.js a usar "polling" (verificar as pastas a cada segundo).
@@ -48,8 +45,8 @@ const nextConfig = {
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
-          { 
-            key: 'Content-Security-Policy', 
+          {
+            key: 'Content-Security-Policy',
             // Política restrita base, permitindo scripts e styles seguros para Next.js no dev,
             // e bloqueando conexões externas não intencionais
             value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https: http:; font-src 'self' data:; connect-src 'self' https: http:"

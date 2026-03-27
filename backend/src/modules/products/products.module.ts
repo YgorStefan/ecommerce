@@ -1,4 +1,3 @@
-// products.module.ts
 // Módulo de produtos
 
 import { Module } from '@nestjs/common';
@@ -14,4 +13,4 @@ import { ProductImage } from './entities/product-image.entity';
   providers: [ProductsService],
   exports: [ProductsService],
 })
-export class ProductsModule {}
+export class ProductsModule { }

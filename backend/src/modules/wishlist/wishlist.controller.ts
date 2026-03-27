@@ -1,5 +1,4 @@
-// wishlist.controller.ts
-// Controller da lista de desejos — todos os endpoints exigem autenticação
+// Controller da lista de desejos
 
 import {
   Controller,
@@ -21,7 +20,7 @@ import { User } from '../users/entities/user.entity';
 @UseGuards(JwtAuthGuard) // Todos os endpoints da wishlist exigem autenticação
 @Controller('wishlist')
 export class WishlistController {
-  constructor(private readonly wishlistService: WishlistService) {}
+  constructor(private readonly wishlistService: WishlistService) { }
 
   // GET /api/wishlist — lista todos os itens da wishlist do usuário
   @Get()

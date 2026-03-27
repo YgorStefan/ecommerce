@@ -9,9 +9,9 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Integração com Brasil API (Gratuita) para validar o CEP e pegar o Estado (UF)
+    // Integração com Brasil API para validar o CEP e pegar o Estado (UF)
     const response = await fetch(`https://brasilapi.com.br/api/cep/v2/${zipCode}`);
-    
+
     if (!response.ok) {
       return NextResponse.json({ message: 'CEP não encontrado' }, { status: 404 });
     }
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const data = await response.json();
     const uf = data.state;
 
-    // Lógica Mock Inteligente de Frete baseado na Região (Custo Zero)
+    // Lógica Mock Inteligente de Frete baseado na Região
     // Valores base fixos simulando uma loja em SP
     let pacPrice = 15.90;
     let pacDays = 5;
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
         sedexPrice += 20;
         pacDays += 3;
         sedexDays += 1;
-      } 
+      }
       // Nordeste/Centro-Oeste/Norte
       else {
         pacPrice += 25;

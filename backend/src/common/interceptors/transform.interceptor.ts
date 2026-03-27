@@ -1,4 +1,3 @@
-// transform.interceptor.ts
 // Interceptor que padroniza o formato de todas as respostas de sucesso da API
 
 import {

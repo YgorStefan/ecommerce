@@ -1,4 +1,3 @@
-// users.module.ts
 // Módulo de usuários
 
 import { Module } from '@nestjs/common';
@@ -12,7 +11,7 @@ import { User } from './entities/user.entity';
   imports: [TypeOrmModule.forFeature([User])],
   controllers: [UsersController],
   providers: [UsersService],
-  // Exporta o serviço para uso em outros módulos (ex: AuthModule)
+  // Exporta o serviço para uso em outros módulos
   exports: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule { }

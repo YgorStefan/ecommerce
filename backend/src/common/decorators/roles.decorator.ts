@@ -1,4 +1,3 @@
-// roles.decorator.ts
 // Decorator @Roles() para definir quais papéis têm acesso a uma rota
 
 import { SetMetadata } from '@nestjs/common';

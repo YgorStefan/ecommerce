@@ -1,4 +1,3 @@
-// create-order.dto.ts
 // DTO para criação de um pedido no checkout
 
 import { ApiProperty } from '@nestjs/swagger';
@@ -58,7 +57,7 @@ export class CreateOrderDto {
   @Type(() => ShippingAddressDto) // Transforma o objeto plano em instância da classe
   shippingAddress: ShippingAddressDto;
 
-  // Código do cupom de desconto — opcional
+  // Código do cupom de desconto
   @ApiProperty({
     example: 'DESCONTO10',
     description: 'Código do cupom',
@@ -68,7 +67,7 @@ export class CreateOrderDto {
   @IsString()
   couponCode?: string;
 
-  // Observações do pedido — opcional
+  // Observações do pedido
   @ApiProperty({ description: 'Observações do pedido', required: false })
   @IsOptional()
   @IsString()

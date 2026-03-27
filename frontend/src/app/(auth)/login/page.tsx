@@ -1,4 +1,3 @@
-// (auth)/login/page.tsx
 // Página de login do usuário
 
 'use client';

@@ -1,4 +1,3 @@
-// admin/layout.tsx
 // Layout do painel administrativo com sidebar de navegação
 
 'use client';

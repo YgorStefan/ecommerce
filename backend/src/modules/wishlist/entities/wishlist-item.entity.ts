@@ -1,5 +1,4 @@
-// wishlist-item.entity.ts
-// Define a entidade WishlistItem — um item na lista de desejos do usuário
+// Define a entidade WishlistItem
 
 import {
   Entity,

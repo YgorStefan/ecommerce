@@ -1,4 +1,3 @@
-// card.tsx
 // Componente Card com subcomponentes (Header, Title, Description, Content, Footer)
 
 import * as React from 'react';

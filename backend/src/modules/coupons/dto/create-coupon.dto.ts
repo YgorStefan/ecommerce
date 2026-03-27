@@ -1,4 +1,3 @@
-// create-coupon.dto.ts
 // DTO para criação e atualização de cupons de desconto
 
 import { ApiProperty } from '@nestjs/swagger';

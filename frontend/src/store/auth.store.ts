@@ -1,4 +1,3 @@
-// auth.store.ts
 // Store Zustand para gerenciamento global do estado de autenticação
 
 import { create } from 'zustand';

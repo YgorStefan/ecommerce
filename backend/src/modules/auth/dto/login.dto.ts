@@ -1,4 +1,3 @@
-// login.dto.ts
 // DTO para validar as credenciais de login do usuário
 
 import { ApiProperty } from '@nestjs/swagger';

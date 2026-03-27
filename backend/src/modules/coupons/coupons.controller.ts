@@ -1,4 +1,3 @@
-// coupons.controller.ts
 // Controller de cupons — validação pública e CRUD administrativo
 
 import {
@@ -25,7 +24,7 @@ import { UserRole } from '../users/entities/user.entity';
 @ApiTags('Cupons')
 @Controller('coupons')
 export class CouponsController {
-  constructor(private readonly couponsService: CouponsService) {}
+  constructor(private readonly couponsService: CouponsService) { }
 
   // POST /api/coupons/validate — valida um cupom (autenticado)
   @Post('validate')
@@ -36,9 +35,7 @@ export class CouponsController {
     return this.couponsService.validate(body.code, body.orderSubtotal);
   }
 
-  // ================== ROTAS ADMINISTRATIVAS ==================
-
-  // GET /api/coupons — lista todos os cupons (admin)
+  // GET /api/coupons — lista todos os cupons
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -48,7 +45,7 @@ export class CouponsController {
     return this.couponsService.findAll();
   }
 
-  // POST /api/coupons — cria cupom (admin)
+  // POST /api/coupons — cria cupom
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -58,7 +55,7 @@ export class CouponsController {
     return this.couponsService.create(createCouponDto);
   }
 
-  // PATCH /api/coupons/:id — atualiza cupom (admin)
+  // PATCH /api/coupons/:id — atualiza cupom
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -68,7 +65,7 @@ export class CouponsController {
     return this.couponsService.update(id, updateDto);
   }
 
-  // DELETE /api/coupons/:id — remove cupom (admin)
+  // DELETE /api/coupons/:id — remove cupom
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
