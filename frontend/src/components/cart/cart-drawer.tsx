@@ -1,6 +1,3 @@
-// cart-drawer.tsx
-// Drawer lateral com os itens do carrinho de compras
-
 'use client';
 
 import { useState } from 'react';
@@ -152,7 +149,7 @@ export function CartDrawer() {
         {/* Rodapé do drawer com subtotal, frete e checkout */}
         {cart && cart.items.length > 0 && (
           <div className="p-4 border-t space-y-4">
-            
+
             {/* Calculadora de frete */}
             <div className="space-y-3 border-b pb-4">
               <span className="text-sm font-medium">Calcular prazo e frete</span>

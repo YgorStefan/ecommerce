@@ -1,4 +1,3 @@
-// account/wishlist/page.tsx
 // Página da lista de desejos do usuário
 
 'use client';

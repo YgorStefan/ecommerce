@@ -1,6 +1,3 @@
-// providers.tsx
-// Componente que agrupa todos os provedores de contexto da aplicação
-
 'use client';
 
 import { useState } from 'react';

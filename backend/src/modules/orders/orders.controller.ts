@@ -1,4 +1,3 @@
-// orders.controller.ts
 // Controller de pedidos — endpoints para clientes e administradores
 
 import {
@@ -31,7 +30,7 @@ import { User, UserRole } from '../users/entities/user.entity';
 @UseGuards(JwtAuthGuard) // Todos os endpoints de pedidos exigem autenticação
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private readonly ordersService: OrdersService) { }
 
   // POST /api/orders — cria um novo pedido a partir do carrinho
   @Post()
@@ -55,9 +54,7 @@ export class OrdersController {
     return this.ordersService.findOne(id, user.id);
   }
 
-  // ================== ROTAS ADMINISTRATIVAS ==================
-
-  // GET /api/orders/stats — estatísticas de vendas (admin)
+  // GET /api/orders/stats — estatísticas de vendas
   @Get('stats')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -66,7 +63,7 @@ export class OrdersController {
     return this.ordersService.getSalesStats();
   }
 
-  // GET /api/orders — lista todos os pedidos (admin)
+  // GET /api/orders — lista todos os pedidos
   @Get()
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -77,7 +74,7 @@ export class OrdersController {
     return this.ordersService.findAll(page, 20, status);
   }
 
-  // GET /api/orders/:id — detalhe de qualquer pedido (admin)
+  // GET /api/orders/:id — detalhe de qualquer pedido
   @Get(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -86,7 +83,7 @@ export class OrdersController {
     return this.ordersService.findOne(id);
   }
 
-  // PATCH /api/orders/:id/status — atualiza status do pedido (admin)
+  // PATCH /api/orders/:id/status — atualiza status do pedido
   @Patch(':id/status')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)

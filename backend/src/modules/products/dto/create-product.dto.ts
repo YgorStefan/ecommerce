@@ -1,4 +1,3 @@
-// create-product.dto.ts
 // DTO para criação de um produto com validação de campos
 
 import { ApiProperty } from '@nestjs/swagger';
@@ -22,19 +21,19 @@ export class CreateProductDto {
   @MinLength(2)
   name: string;
 
-  // Descrição do produto — obrigatória
+  // Descrição do produto
   @ApiProperty({ description: 'Descrição detalhada do produto' })
   @IsString()
   @MinLength(10)
   description: string;
 
-  // Preço de venda — obrigatório, deve ser positivo
+  // Preço de venda
   @ApiProperty({ example: 49.99, description: 'Preço de venda' })
   @IsNumber()
   @Min(0.01, { message: 'Preço deve ser maior que zero' })
   price: number;
 
-  // Preço original (para mostrar desconto) — opcional
+  // Preço original (para mostrar desconto)
   @ApiProperty({
     example: 69.99,
     description: 'Preço original',
@@ -45,13 +44,13 @@ export class CreateProductDto {
   @Min(0)
   originalPrice?: number;
 
-  // Quantidade em estoque — deve ser não-negativo
+  // Quantidade em estoque
   @ApiProperty({ example: 100, description: 'Quantidade em estoque' })
   @IsNumber()
   @Min(0)
   stock: number;
 
-  // Código SKU — opcional mas deve ser único
+  // Código SKU
   @ApiProperty({
     example: 'CAM-BR-M',
     description: 'Código SKU',
@@ -61,7 +60,7 @@ export class CreateProductDto {
   @IsString()
   sku?: string;
 
-  // URL da imagem principal — opcional (pode ser enviada após criar)
+  // URL da imagem principal
   @ApiProperty({ description: 'URL da imagem principal', required: false })
   @IsOptional()
   @IsString()

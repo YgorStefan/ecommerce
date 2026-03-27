@@ -1,4 +1,3 @@
-// order-item.entity.ts
 // Define a entidade OrderItem — representa cada produto dentro de um pedido
 
 import {
@@ -40,7 +39,7 @@ export class OrderItem {
   @Column({ nullable: true })
   productId: string;
 
-  // Nome do produto no momento da compra (snapshot para histórico)
+  // Nome do produto no momento da compra
   @ApiProperty({ description: 'Nome do produto no momento da compra' })
   @Column({ length: 200 })
   productName: string;
@@ -53,7 +52,7 @@ export class OrderItem {
   @Column({ nullable: true })
   productImage: string;
 
-  // Preço unitário no momento da compra (snapshot para histórico)
+  // Preço unitário no momento da compra
   @ApiProperty({ description: 'Preço unitário no momento da compra' })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   unitPrice: number;
@@ -63,7 +62,7 @@ export class OrderItem {
   @Column()
   quantity: number;
 
-  // Total do item (unitPrice × quantity)
+  // Total do item
   @ApiProperty({ description: 'Valor total do item' })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   total: number;

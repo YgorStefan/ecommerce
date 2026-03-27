@@ -1,5 +1,4 @@
-// user.entity.ts
-// Define a entidade User (usuário) que mapeia para a tabela "users" no banco de dados
+// Define a entidade User
 
 import {
   Entity,
@@ -43,7 +42,7 @@ export class User {
   @Column()
   password: string;
 
-  // Papel do usuário no sistema (admin ou user)
+  // Papel do usuário no sistema
   @ApiProperty({ enum: UserRole, description: 'Papel do usuário' })
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
@@ -73,7 +72,7 @@ export class User {
   @Column({ nullable: true, length: 10 })
   zipCode: string;
 
-  // Indica se a conta está ativa (admin pode desativar usuários)
+  // Indica se a conta está ativa
   @ApiProperty({ description: 'Indica se a conta está ativa' })
   @Column({ default: true })
   isActive: boolean;

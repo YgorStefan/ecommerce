@@ -1,4 +1,3 @@
-// categories.module.ts
 // Módulo de categorias
 
 import { Module } from '@nestjs/common';
@@ -13,4 +12,4 @@ import { Category } from './entities/category.entity';
   providers: [CategoriesService],
   exports: [CategoriesService],
 })
-export class CategoriesModule {}
+export class CategoriesModule { }

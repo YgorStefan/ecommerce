@@ -1,4 +1,3 @@
-// wishlist.service.ts
 // Serviço que gerencia a lista de desejos do usuário
 
 import {
@@ -20,7 +19,7 @@ export class WishlistService {
     // Repositório de produtos para verificar existência
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
-  ) {}
+  ) { }
 
   // Retorna todos os itens da lista de desejos do usuário
   async findAll(userId: string): Promise<WishlistItem[]> {

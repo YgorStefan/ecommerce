@@ -1,4 +1,3 @@
-// account/orders/page.tsx
 // Página de histórico de pedidos do usuário
 
 'use client';

@@ -1,4 +1,3 @@
-// products.service.ts
 // Serviço que gerencia todas as operações de produtos
 
 import {
@@ -23,7 +22,7 @@ export class ProductsService {
     // Repositório para imagens de produtos
     @InjectRepository(ProductImage)
     private productImagesRepository: Repository<ProductImage>,
-  ) {}
+  ) { }
 
   // Busca produtos com filtros avançados e paginação
   async findAll(queryDto: QueryProductDto) {

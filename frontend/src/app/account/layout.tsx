@@ -1,4 +1,3 @@
-// account/layout.tsx
 // Layout da área do usuário com sidebar de navegação
 
 import { Header } from '@/components/layout/header';

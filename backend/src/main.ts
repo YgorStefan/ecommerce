@@ -1,4 +1,3 @@
-// main.ts
 // Ponto de entrada da aplicação NestJS
 // Configura o servidor HTTP, validação global, Swagger e CORS
 
@@ -8,7 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 async function bootstrap() {
@@ -43,7 +42,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true, // Remove propriedades não declaradas nos DTOs
       forbidNonWhitelisted: true, // Rejeita requisições com propriedades extras
-      transform: true, // Transforma automaticamente os tipos (string → number, etc.)
+      transform: true, // Transforma automaticamente os tipos
       transformOptions: {
         enableImplicitConversion: true, // Permite conversão implícita de tipos
       },

@@ -1,4 +1,3 @@
-// (shop)/page.tsx
 // Página inicial da loja — hero, produtos em destaque e categorias otimizados com Suspense e Streaming
 
 import { Suspense } from 'react';
@@ -7,7 +6,7 @@ import { ArrowRight, Truck, Shield, RefreshCw, Headphones, Loader2 } from 'lucid
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product/product-card';
 
-// =================== BUSCA DE DADOS ===================
+//  BUSCA DE DADOS 
 
 async function getFeaturedProducts() {
   try {
@@ -36,7 +35,7 @@ async function getCategories() {
   }
 }
 
-// =================== SEÇÕES COM STREAMING (SUSPENSE) ===================
+//  SEÇÕES COM STREAMING
 
 // Componente Wrapper para Produtos em Destaque
 async function FeaturedProductsSection() {
@@ -124,7 +123,7 @@ function CategoriesSkeleton() {
 }
 
 
-// =================== PÁGINA PRINCIPAL ===================
+//  PÁGINA PRINCIPAL 
 
 export default function HomePage() {
   // Removido o Promise.all() bloqueante. Agora o Hero carrega instantaneamente
@@ -132,7 +131,7 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* ==================== SEÇÃO HERO ==================== */}
+      {/*  SEÇÃO HERO  */}
       <section className="relative bg-gradient-to-br from-background to-muted py-20 px-4">
         <div className="container mx-auto max-w-4xl text-center space-y-6">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
@@ -157,7 +156,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ==================== PRODUTOS EM DESTAQUE ==================== */}
+      {/*  PRODUTOS EM DESTAQUE  */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
           <div className="relative flex items-center justify-center mb-8">
@@ -177,12 +176,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ==================== CATEGORIAS ==================== */}
+      {/*  CATEGORIAS  */}
       <Suspense fallback={<CategoriesSkeleton />}>
         <CategoriesSection />
       </Suspense>
 
-      {/* ==================== DIFERENCIAIS ==================== */}
+      {/*  DIFERENCIAIS  */}
       <section className="py-12 px-4 border-y bg-muted/30">
         <div className="container mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

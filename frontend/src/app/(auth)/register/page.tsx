@@ -1,4 +1,3 @@
-// (auth)/register/page.tsx
 // Página de cadastro de novo usuário
 
 'use client';

@@ -1,6 +1,3 @@
-// header.tsx
-// Componente Header da loja — navegação, busca, carrinho e conta do usuário
-
 'use client';
 
 import { useState } from 'react';

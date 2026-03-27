@@ -1,16 +1,14 @@
-// utils.ts
 // Funções utilitárias usadas em toda a aplicação
 
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 // Combina classes CSS condicionalmente e resolve conflitos do Tailwind
-// Uso: cn('px-4', isActive && 'bg-primary', className)
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Formata um valor numérico como moeda brasileira (R$)
+// Formata um valor numérico como moeda brasileira  
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -18,7 +16,7 @@ export function formatCurrency(value: number): string {
   }).format(value);
 }
 
-// Formata uma data para o padrão brasileiro (dd/mm/aaaa)
+// Formata uma data para o padrão brasileiro
 export function formatDate(date: string | Date): string {
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
@@ -38,7 +36,7 @@ export function formatDateTime(date: string | Date): string {
   }).format(new Date(date));
 }
 
-// Trunca um texto longo e adiciona "..." no final
+// Trunca um texto longo e adiciona ...
 export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength) + '...';

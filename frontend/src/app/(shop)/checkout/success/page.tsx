@@ -1,4 +1,3 @@
-// checkout/success/page.tsx
 // Página de confirmação de pedido após checkout bem-sucedido
 
 'use client';

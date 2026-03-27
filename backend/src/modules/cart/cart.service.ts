@@ -1,4 +1,3 @@
-// cart.service.ts
 // Serviço que gerencia todas as operações do carrinho de compras
 
 import {
@@ -24,9 +23,9 @@ export class CartService {
     // Repositório de produtos para verificar disponibilidade
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
-  ) {}
+  ) { }
 
-  // Obtém o carrinho do usuário logado (cria um se não existir)
+  // Obtém o carrinho do usuário logado
   async getCart(
     userId: string,
   ): Promise<Cart & { subtotal: number; itemCount: number }> {

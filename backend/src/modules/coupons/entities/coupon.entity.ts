@@ -1,4 +1,3 @@
-// coupon.entity.ts
 // Define a entidade Coupon (cupom de desconto)
 
 import {
@@ -12,8 +11,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 // Enum para o tipo de desconto do cupom
 export enum DiscountType {
-  PERCENTAGE = 'percentage', // Desconto em percentual (ex: 10%)
-  FIXED = 'fixed', // Desconto em valor fixo (ex: R$ 20,00)
+  PERCENTAGE = 'percentage', // Desconto em percentual
+  FIXED = 'fixed', // Desconto em valor fixo
 }
 
 @Entity('coupons')
@@ -45,7 +44,7 @@ export class Coupon {
   @Column({ type: 'enum', enum: DiscountType })
   discountType: DiscountType;
 
-  // Valor do desconto (percentual ou valor em reais)
+  // Valor do desconto
   @ApiProperty({ description: 'Valor do desconto' })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   discountValue: number;

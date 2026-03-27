@@ -1,4 +1,3 @@
-// products.controller.ts
 // Controller de produtos — endpoints públicos e administrativos
 
 import {
@@ -36,23 +35,23 @@ import { UserRole } from '../users/entities/user.entity';
 @ApiTags('Produtos')
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
 
-  // GET /api/products — lista produtos com filtros avançados (pública)
+  // GET /api/products — lista produtos com filtros avançados
   @Get()
   @ApiOperation({ summary: 'Listar produtos com filtros e paginação' })
   findAll(@Query() queryDto: QueryProductDto) {
     return this.productsService.findAll(queryDto);
   }
 
-  // GET /api/products/:slug — detalhe do produto por slug (pública)
+  // GET /api/products/:slug — detalhe do produto por slug
   @Get(':slug')
   @ApiOperation({ summary: 'Buscar produto por slug' })
   findBySlug(@Param('slug') slug: string) {
     return this.productsService.findBySlug(slug);
   }
 
-  // POST /api/products — cria produto (admin)
+  // POST /api/products — cria produto
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -62,7 +61,7 @@ export class ProductsController {
     return this.productsService.create(createProductDto);
   }
 
-  // PATCH /api/products/:id — atualiza produto (admin)
+  // PATCH /api/products/:id — atualiza produto
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -75,7 +74,7 @@ export class ProductsController {
     return this.productsService.update(id, updateProductDto);
   }
 
-  // DELETE /api/products/:id — remove produto com soft delete (admin)
+  // DELETE /api/products/:id — remove produto com soft delete
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -86,7 +85,7 @@ export class ProductsController {
     return this.productsService.remove(id);
   }
 
-  // POST /api/products/:id/images — faz upload de imagens do produto (admin)
+  // POST /api/products/:id/images — faz upload de imagens do produto
   @Post(':id/images')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -129,7 +128,7 @@ export class ProductsController {
     return this.productsService.addImages(id, images);
   }
 
-  // DELETE /api/products/:id/images/:imageId — remove uma imagem (admin)
+  // DELETE /api/products/:id/images/:imageId — remove uma imagem
   @Delete(':id/images/:imageId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)

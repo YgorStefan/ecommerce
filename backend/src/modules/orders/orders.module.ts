@@ -1,4 +1,3 @@
-// orders.module.ts
 // Módulo de pedidos — integra carrinho, cupons, produtos e e-mail
 
 import { Module } from '@nestjs/common';
@@ -24,4 +23,4 @@ import { EmailModule } from '../email/email.module';
   providers: [OrdersService],
   exports: [OrdersService],
 })
-export class OrdersModule {}
+export class OrdersModule { }

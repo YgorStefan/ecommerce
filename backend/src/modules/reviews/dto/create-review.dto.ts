@@ -1,4 +1,3 @@
-// create-review.dto.ts
 // DTO para criação de avaliação de produto
 
 import { ApiProperty } from '@nestjs/swagger';

@@ -1,4 +1,3 @@
-// coupons.module.ts
 // Módulo de cupons de desconto
 
 import { Module } from '@nestjs/common';
@@ -13,4 +12,4 @@ import { Coupon } from './entities/coupon.entity';
   providers: [CouponsService],
   exports: [CouponsService], // Exporta para uso no módulo de pedidos
 })
-export class CouponsModule {}
+export class CouponsModule { }

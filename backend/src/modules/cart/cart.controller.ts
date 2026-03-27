@@ -1,4 +1,3 @@
-// cart.controller.ts
 // Controller do carrinho — todos os endpoints exigem autenticação
 
 import {
@@ -24,7 +23,7 @@ import { User } from '../users/entities/user.entity';
 @UseGuards(JwtAuthGuard) // Todos os endpoints do carrinho exigem autenticação
 @Controller('cart')
 export class CartController {
-  constructor(private readonly cartService: CartService) {}
+  constructor(private readonly cartService: CartService) { }
 
   // GET /api/cart — obtém o carrinho do usuário autenticado
   @Get()

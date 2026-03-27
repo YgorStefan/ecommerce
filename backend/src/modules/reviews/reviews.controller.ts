@@ -1,4 +1,3 @@
-// reviews.controller.ts
 // Controller de avaliações de produtos
 
 import {
@@ -22,9 +21,9 @@ import { User, UserRole } from '../users/entities/user.entity';
 @ApiTags('Avaliações')
 @Controller('reviews')
 export class ReviewsController {
-  constructor(private readonly reviewsService: ReviewsService) {}
+  constructor(private readonly reviewsService: ReviewsService) { }
 
-  // GET /api/reviews/product/:productId — lista avaliações de um produto (pública)
+  // GET /api/reviews/product/:productId — lista avaliações de um produto
   @Get('product/:productId')
   @ApiOperation({ summary: 'Listar avaliações de um produto' })
   findByProduct(
@@ -52,7 +51,7 @@ export class ReviewsController {
     return this.reviewsService.create(user.id, createReviewDto);
   }
 
-  // DELETE /api/reviews/:id — remove uma avaliação (autor ou admin)
+  // DELETE /api/reviews/:id — remove uma avaliação
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

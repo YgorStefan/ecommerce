@@ -1,4 +1,3 @@
-// jwt.strategy.ts
 // Estratégia Passport para validar tokens JWT de acesso
 
 import { Injectable, UnauthorizedException } from '@nestjs/common';
@@ -11,9 +10,9 @@ import { User } from '../../users/entities/user.entity';
 
 // Interface que define o payload contido no JWT
 export interface JwtPayload {
-  sub: string; // ID do usuário (subject)
+  sub: string; // ID do usuário
   email: string; // E-mail do usuário
-  role: string; // Papel do usuário (admin/user)
+  role: string; // Papel do usuário 
 }
 
 @Injectable()

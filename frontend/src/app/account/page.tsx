@@ -1,4 +1,3 @@
-// account/page.tsx
 // Página de perfil do usuário com edição de dados
 
 'use client';

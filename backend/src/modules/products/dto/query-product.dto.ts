@@ -1,4 +1,3 @@
-// query-product.dto.ts
 // DTO para os parâmetros de busca e filtragem de produtos
 
 import { ApiProperty } from '@nestjs/swagger';
@@ -62,7 +61,7 @@ export class QueryProductDto {
   @IsEnum(ProductSortBy)
   sortBy?: ProductSortBy;
 
-  // Número da página para paginação (começa em 1)
+  // Número da página para paginação
   @ApiProperty({ description: 'Número da página', required: false, default: 1 })
   @IsOptional()
   @Type(() => Number)

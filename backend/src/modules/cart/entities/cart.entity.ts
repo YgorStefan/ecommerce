@@ -1,4 +1,3 @@
-// cart.entity.ts
 // Define a entidade Cart (carrinho de compras) — cada usuário tem um carrinho
 
 import {

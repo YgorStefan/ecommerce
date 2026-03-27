@@ -1,4 +1,3 @@
-// categories.controller.ts
 // Controller de categorias — endpoints públicos e administrativos
 
 import {
@@ -26,23 +25,23 @@ import { UserRole } from '../users/entities/user.entity';
 @ApiTags('Categorias')
 @Controller('categories')
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(private readonly categoriesService: CategoriesService) { }
 
-  // GET /api/categories — lista categorias (pública)
+  // GET /api/categories — lista categorias
   @Get()
   @ApiOperation({ summary: 'Listar categorias' })
   findAll(@Query('includeInactive') includeInactive?: boolean) {
     return this.categoriesService.findAll(includeInactive);
   }
 
-  // GET /api/categories/:id — detalhe de categoria (pública)
+  // GET /api/categories/:id — detalhe de categoria
   @Get(':id')
   @ApiOperation({ summary: 'Buscar categoria por ID' })
   findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(id);
   }
 
-  // POST /api/categories — cria categoria (admin)
+  // POST /api/categories — cria categoria
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -52,7 +51,7 @@ export class CategoriesController {
     return this.categoriesService.create(createCategoryDto);
   }
 
-  // PATCH /api/categories/:id — atualiza categoria (admin)
+  // PATCH /api/categories/:id — atualiza categoria
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -65,7 +64,7 @@ export class CategoriesController {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 
-  // DELETE /api/categories/:id — remove categoria (admin)
+  // DELETE /api/categories/:id — remove categoria
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)

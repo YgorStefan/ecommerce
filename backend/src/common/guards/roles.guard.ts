@@ -1,4 +1,3 @@
-// roles.guard.ts
 // Guard que verifica se o usuário autenticado tem o papel necessário para acessar a rota
 
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
@@ -9,7 +8,7 @@ import { ROLES_KEY } from '../decorators/roles.decorator';
 @Injectable()
 export class RolesGuard implements CanActivate {
   // Injeta o Reflector para ler os metadados definidos pelo @Roles()
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) { }
 
   canActivate(context: ExecutionContext): boolean {
     // Obtém os papéis necessários definidos pelo decorator @Roles()

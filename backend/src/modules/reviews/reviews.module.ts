@@ -1,4 +1,3 @@
-// reviews.module.ts
 // Módulo de avaliações de produtos
 
 import { Module } from '@nestjs/common';
@@ -13,4 +12,4 @@ import { Product } from '../products/entities/product.entity';
   controllers: [ReviewsController],
   providers: [ReviewsService],
 })
-export class ReviewsModule {}
+export class ReviewsModule { }

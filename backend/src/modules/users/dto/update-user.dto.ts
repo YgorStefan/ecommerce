@@ -1,5 +1,4 @@
-// update-user.dto.ts
-// DTO para atualização do perfil do usuário (todos os campos são opcionais)
+// DTO para atualização do perfil do usuário
 
 import { ApiProperty } from '@nestjs/swagger';
 import {

@@ -1,4 +1,3 @@
-// auth.service.ts
 // Serviço de autenticação — gerencia registro, login e tokens JWT
 
 import {
@@ -33,7 +32,7 @@ export class AuthService {
     private configService: ConfigService,
     // Serviço de e-mail para enviar confirmações
     private emailService: EmailService,
-  ) {}
+  ) { }
 
   // Registra um novo usuário no sistema
   async register(registerDto: RegisterDto) {
@@ -153,13 +152,13 @@ export class AuthService {
       role: user.role,
     };
 
-    // Gera o access token com validade curta (15 minutos por padrão)
+    // Gera o access token com validade curta
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
       expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m'),
     });
 
-    // Gera o refresh token com validade longa (7 dias por padrão)
+    // Gera o refresh token com validade longa
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
@@ -170,7 +169,7 @@ export class AuthService {
 
   // Método privado que salva o hash do refresh token no banco
   private async saveRefreshToken(userId: string, refreshToken: string) {
-    // Faz o hash do refresh token antes de salvar (segurança adicional)
+    // Faz o hash do refresh token antes de salvar
     const hashedToken = await bcrypt.hash(refreshToken, 10);
     await this.usersRepository.update(userId, { refreshToken: hashedToken });
   }

@@ -1,4 +1,3 @@
-// register.dto.ts
 // DTO (Data Transfer Object) para validar os dados de cadastro de usuário
 
 import { ApiProperty } from '@nestjs/swagger';

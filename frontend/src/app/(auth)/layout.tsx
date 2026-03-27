@@ -1,4 +1,3 @@
-// (auth)/layout.tsx
 // Layout das páginas de autenticação — centralizado sem header/footer
 
 export default function AuthLayout({

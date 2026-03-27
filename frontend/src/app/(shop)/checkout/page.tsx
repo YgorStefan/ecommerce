@@ -1,4 +1,3 @@
-// checkout/page.tsx
 // Página de checkout — formulário de endereço, resumo do pedido e pagamento mock
 
 'use client';
@@ -124,7 +123,7 @@ export default function CheckoutPage() {
         toast.error("Preencha os dados do cartão para continuar.");
         return;
       }
-      
+
       const response = await ordersService.create({
         paymentMethod: data.paymentMethod,
         shippingAddress: {
@@ -260,7 +259,7 @@ export default function CheckoutPage() {
           </form>
         </div>
 
-        {/* ==================== RESUMO DO PEDIDO ==================== */}
+        {/*  RESUMO DO PEDIDO  */}
         <div className="space-y-4">
           {/* Lista de itens do pedido */}
           <Card>

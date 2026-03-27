@@ -1,4 +1,3 @@
-// cart-item.entity.ts
 // Define a entidade CartItem — representa um produto dentro do carrinho
 
 import {
@@ -51,7 +50,7 @@ export class CartItem {
   @CreateDateColumn()
   createdAt: Date;
 
-  // Data de atualização (ex: mudança de quantidade)
+  // Data de atualização
   @UpdateDateColumn()
   updatedAt: Date;
 }

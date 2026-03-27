@@ -1,5 +1,4 @@
-// order.entity.ts
-// Define a entidade Order (pedido) com todos os seus campos e relações
+// Define a entidade Order com todos os seus campos e relações
 
 import {
   Entity,
@@ -48,7 +47,7 @@ export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // Número do pedido amigável para exibição (ex: ORD-2024-000001)
+  // Número do pedido amigável para exibição
   @ApiProperty({ description: 'Número do pedido' })
   @Column({ unique: true, length: 50 })
   orderNumber: string;
@@ -101,12 +100,12 @@ export class Order {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   shippingCost: number;
 
-  // Valor total do pedido (subtotal - desconto + frete)
+  // Valor total do pedido
   @ApiProperty({ description: 'Valor total do pedido' })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   total: number;
 
-  // Cupom utilizado no pedido (relação opcional)
+  // Cupom utilizado no pedido
   @ManyToOne(() => Coupon, { nullable: true, eager: true })
   @JoinColumn({ name: 'couponId' })
   coupon: Coupon;

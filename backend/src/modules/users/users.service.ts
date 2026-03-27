@@ -1,4 +1,3 @@
-// users.service.ts
 // Serviço que gerencia as operações de usuários no banco de dados
 
 import {
@@ -18,7 +17,7 @@ export class UsersService {
     // Repositório TypeORM para operações na tabela users
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-  ) {}
+  ) { }
 
   // Busca todos os usuários — apenas para uso administrativo
   async findAll(page = 1, limit = 20) {
@@ -104,7 +103,7 @@ export class UsersService {
     return this.findOne(id);
   }
 
-  // Realiza o soft delete do usuário (marca deletedAt sem remover do banco)
+  // Realiza o soft delete do usuário
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
     // softRemove usa o campo deletedAt do TypeORM

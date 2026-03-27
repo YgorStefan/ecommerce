@@ -1,5 +1,4 @@
-// users.controller.ts
-// Controller de usuários — endpoints de perfil e administração de usuários
+// Controller de usuários
 
 import {
   Controller,
@@ -31,7 +30,7 @@ import { User, UserRole } from './entities/user.entity';
 @UseGuards(JwtAuthGuard) // Aplica o guard JWT em todos os métodos
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   // GET /api/users/me — retorna o perfil do usuário autenticado
   @Get('me')
@@ -65,9 +64,7 @@ export class UsersController {
     );
   }
 
-  // ================== ROTAS ADMINISTRATIVAS ==================
-
-  // GET /api/users — lista todos os usuários (apenas admin)
+  // GET /api/users — lista todos os usuários
   @Get()
   @UseGuards(RolesGuard) // Aplica verificação de papel além do JWT
   @Roles(UserRole.ADMIN) // Apenas admins podem acessar
@@ -78,7 +75,7 @@ export class UsersController {
     return this.usersService.findAll(page, limit);
   }
 
-  // GET /api/users/:id — busca um usuário por ID (apenas admin)
+  // GET /api/users/:id — busca um usuário por ID
   @Get(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -87,7 +84,7 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
-  // PATCH /api/users/:id — atualiza usuário (apenas admin)
+  // PATCH /api/users/:id — atualiza usuário
   @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -99,7 +96,7 @@ export class UsersController {
     return this.usersService.adminUpdate(id, adminUpdateDto);
   }
 
-  // DELETE /api/users/:id — remove usuário com soft delete (apenas admin)
+  // DELETE /api/users/:id — remove usuário com soft delete
   @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)

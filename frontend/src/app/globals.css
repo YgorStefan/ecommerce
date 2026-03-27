@@ -1,11 +1,9 @@
-/* globals.css */
-/* Estilos globais e variáveis de tema do design system */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+
   /* Variáveis de cores para o tema claro */
   :root {
     --background: 0 0% 100%;
@@ -55,6 +53,7 @@
 }
 
 @layer base {
+
   /* Aplica as cores de fundo e texto de forma global */
   * {
     @apply border-border;
