@@ -116,7 +116,7 @@ export class Order {
 
   // Endereço de entrega — armazenado como JSON para histórico imutável
   @ApiProperty({ description: 'Endereço de entrega' })
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'json' })
   shippingAddress: {
     name: string;
     address: string;

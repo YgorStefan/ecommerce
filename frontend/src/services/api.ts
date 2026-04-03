@@ -46,7 +46,7 @@ api.interceptors.response.use(
       } catch {
         if (typeof window !== 'undefined') {
           localStorage.removeItem('userId');
-          window.location.href = '/login';
+          window.location.href = '/ecommerce/login';
         }
       }
     }
@@ -222,6 +222,6 @@ export const couponsService = {
 // Serviço de frete
 export const shippingService = {
   // Calcula preço e prazo PAC/SEDEX (usando a API Serverless gratuita do Next.js)
-  calculate: (zipCode: string) => axios.get('/api/shipping/calculate', { params: { zipCode } }),
+  calculate: (zipCode: string) => axios.get('/ecommerce/api/shipping/calculate', { params: { zipCode } }),
 };
 

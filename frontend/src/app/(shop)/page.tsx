@@ -11,7 +11,7 @@ import { ProductCard } from '@/components/product/product-card';
 async function getFeaturedProducts() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/products?featured=true&limit=8`,
+      `${process.env.INTERNAL_API_URL || 'http://localhost:3001'}/api/products?featured=true&limit=8`,
       { next: { revalidate: 60 } },
     );
     if (!res.ok) return [];
@@ -24,7 +24,7 @@ async function getFeaturedProducts() {
 
 async function getCategories() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`, {
+    const res = await fetch(`${process.env.INTERNAL_API_URL || 'http://localhost:3001'}/api/categories`, {
       next: { revalidate: 300 },
     });
     if (!res.ok) return [];

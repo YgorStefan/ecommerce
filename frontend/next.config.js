@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Gera uma pasta standalone com apenas os arquivos necessários para produção
-  // Isso permite o build multi-stage no Docker (imagem menor)
-  output: 'standalone',
+  // Prefixo de caminho para rodar em /ecommerce na Hostinger
+  basePath: '/ecommerce',
 
   // Configuração de imagens externas permitidas
   images: {
@@ -20,17 +19,20 @@ const nextConfig = {
     ],
   },
 
-  // Configuração crítica para WSL2/Windows com Docker!
-  // Como o sistema de arquivos do Windows não emite eventos nativos do Linux (inotify),
-  // forçamos o Next.js a usar "polling" (verificar as pastas a cada segundo).
-  webpack: (config, context) => {
-    if (context.dev) {
-      config.watchOptions = {
-        poll: 1000, // Verifica alterações a cada 1 segundo
-        aggregateTimeout: 300,
-      };
-    }
-    return config;
+  // Proxy reverso: repassa chamadas de API e uploads do browser para o NestJS local
+  // O browser chama ygorstefan.com/ecommerce/api/* e o Next.js encaminha para localhost:3001
+  async rewrites() {
+    const backendUrl = process.env.INTERNAL_API_URL || 'http://localhost:3001';
+    return [
+      {
+        source: '/ecommerce/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
+      },
+      {
+        source: '/ecommerce/uploads/:path*',
+        destination: `${backendUrl}/uploads/:path*`,
+      },
+    ];
   },
 
   // Headers estritos de Segurança Preventiva
