@@ -6,7 +6,7 @@ type Props = {
 
 // Next.js Server-Side App Router API
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.INTERNAL_API_URL || 'http://localhost:3001';
+  const API_URL = process.env.INTERNAL_API_URL || 'http://localhost:3001';
 
   try {
     // Busca dados no backend (isso roda no Node do Next.js)

@@ -40,16 +40,16 @@ import { ShippingModule } from './modules/shipping/shipping.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
+        type: 'mysql',
         host: configService.get<string>('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 5432),
+        port: configService.get<number>('DB_PORT', 3306),
         username: configService.get<string>('DB_USER', 'ecommerce'),
         password: configService.get<string>('DB_PASSWORD', 'ecommerce123'),
         database: configService.get<string>('DB_NAME', 'ecommerce_db'),
         // Carrega automaticamente todas as entidades registradas nos módulos
         autoLoadEntities: true,
-        // Em produção, use migrations em vez de synchronize
-        synchronize: configService.get<string>('NODE_ENV') !== 'production',
+        // DB_SYNC=true apenas no primeiro deploy para criar as tabelas
+        synchronize: configService.get<string>('DB_SYNC') === 'true',
         logging: configService.get<string>('NODE_ENV') === 'development',
       }),
     }),

@@ -1,0 +1,22 @@
+# .htaccess — Raiz do E-commerce
+# Protege arquivos sensíveis de acesso direto
+
+Options -Indexes
+
+# Bloqueia acesso direto aos arquivos sensíveis
+<FilesMatch "\.(env|sql|md|json|lock|gitignore|sh)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Bloqueia acesso direto ao código fonte do backend e frontend
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Bloqueia acesso direto ao src, node_modules e dist do backend
+    RewriteRule ^backend/src/ - [F,L]
+    RewriteRule ^backend/node_modules/ - [F,L]
+    RewriteRule ^frontend/src/ - [F,L]
+    RewriteRule ^frontend/node_modules/ - [F,L]
+    RewriteRule ^frontend/.next/ - [F,L]
+</IfModule>
