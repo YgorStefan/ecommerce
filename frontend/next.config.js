@@ -19,6 +19,12 @@ const nextConfig = {
     ],
   },
 
+  // Limita workers para compatibilidade com hospedagem compartilhada (SWC/Rayon thread pool)
+  experimental: {
+    workerThreads: false,
+    cpus: 1,
+  },
+
   // Proxy reverso: repassa chamadas de API e uploads do browser para o NestJS local
   // O browser chama ygorstefan.com/ecommerce/api/* e o Next.js encaminha para localhost:3001
   async rewrites() {
