@@ -10,7 +10,11 @@ import {
   Res,
   Req,
   UnauthorizedException,
+  Headers,
+  ForbiddenException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import type { Response } from 'express';
 import {
   ApiTags,
@@ -23,14 +27,29 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { User } from '../users/entities/user.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 
 // @ApiTags agrupa os endpoints no Swagger UI
 @ApiTags('Autenticação')
 @Controller('auth')
 export class AuthController {
-  // Injeta o serviço de autenticação
-  constructor(private readonly authService: AuthService) { }
+  constructor(
+    private readonly authService: AuthService,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) { }
+
+  // POST /api/auth/promote-admin — endpoint temporário de seed (remover após uso)
+  @Post('promote-admin')
+  @HttpCode(HttpStatus.OK)
+  async promoteAdmin(
+    @Headers('x-seed-token') token: string,
+    @Body() body: { email: string },
+  ) {
+    if (token !== process.env.SEED_TOKEN) throw new ForbiddenException();
+    await this.usersRepository.update({ email: body.email }, { role: UserRole.ADMIN });
+    return { promoted: body.email };
+  }
 
   // POST /api/auth/register — cadastro de novo usuário
   @Post('register')
