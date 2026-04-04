@@ -51,3 +51,4 @@ frontend/public/sitemap-*.xml
 # GSD
 .planning/
 .claude/
+.env.deploy

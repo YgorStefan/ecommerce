@@ -1,13 +1,22 @@
 #!/bin/bash
 # deploy.sh — commit local changes and deploy to Vercel + Railway
 # Uso: bash deploy.sh "mensagem do commit"
+#
+# Antes de usar: copie .env.deploy.example para .env.deploy e preencha os valores.
 
 set -e
 
-RAILWAY_TOKEN="0kzDCxKpCuCPbMMHjwaGDsu2Y0gQA2M6sUJAoiwY58k"
-RAILWAY_PROJECT="b64a1819-3b67-4e51-a816-60c3532575d1"
-RAILWAY_ENV="958f7001-0fa0-4db4-988f-6aeec8e8972d"
-RAILWAY_BACKEND_SVC="e683dade-f92d-4826-8bc2-ff35975d6c4e"
+# Carrega variáveis do .env.deploy se existir
+if [ -f "$(dirname "$0")/.env.deploy" ]; then
+  set -a
+  source "$(dirname "$0")/.env.deploy"
+  set +a
+fi
+
+RAILWAY_TOKEN="${RAILWAY_TOKEN:?Defina RAILWAY_TOKEN no arquivo .env.deploy}"
+RAILWAY_PROJECT="${RAILWAY_PROJECT:?Defina RAILWAY_PROJECT no arquivo .env.deploy}"
+RAILWAY_ENV="${RAILWAY_ENV:?Defina RAILWAY_ENV no arquivo .env.deploy}"
+RAILWAY_BACKEND_SVC="${RAILWAY_BACKEND_SVC:?Defina RAILWAY_BACKEND_SVC no arquivo .env.deploy}"
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 FRONTEND_DIR="$ROOT_DIR/frontend"
 
