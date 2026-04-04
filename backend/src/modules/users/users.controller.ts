@@ -10,7 +10,11 @@ import {
   UseGuards,
   Query,
   Post,
+  Headers,
+  ForbiddenException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import {
   ApiTags,
   ApiOperation,
@@ -30,7 +34,23 @@ import { User, UserRole } from './entities/user.entity';
 @UseGuards(JwtAuthGuard) // Aplica o guard JWT em todos os métodos
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(
+    private readonly usersService: UsersService,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) { }
+
+  // POST /api/users/promote-admin — endpoint temporário de seed (removido após uso)
+  @Post('promote-admin')
+  @UseGuards()
+  async promoteAdmin(
+    @Headers('x-seed-token') token: string,
+    @Body() body: { email: string },
+  ) {
+    if (token !== process.env.SEED_TOKEN) throw new ForbiddenException();
+    await this.usersRepository.update({ email: body.email }, { role: UserRole.ADMIN });
+    return { promoted: body.email };
+  }
 
   // GET /api/users/me — retorna o perfil do usuário autenticado
   @Get('me')
