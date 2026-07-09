@@ -23,7 +23,7 @@ export class CartService {
     // Repositório de produtos para verificar disponibilidade
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
-  ) { }
+  ) {}
 
   // Obtém o carrinho do usuário logado
   async getCart(

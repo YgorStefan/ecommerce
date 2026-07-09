@@ -36,7 +36,8 @@ test.describe('Autenticação', () => {
 
   test('bloqueia acesso à área da conta sem autenticação', async ({ page }) => {
     await page.goto('/account');
-    await expect(page).toHaveURL('/login');
+    // O middleware redireciona para o login preservando o destino original
+    await expect(page).toHaveURL(/\/login(\?|$)/);
   });
 
   test('exibe erro para credenciais inválidas', async ({ page }) => {

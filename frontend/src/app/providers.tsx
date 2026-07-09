@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { useAuthStore } from '@/store/auth.store';
 import { useCartStore } from '@/store/cart.store';
@@ -43,16 +44,20 @@ export function Providers({ children }: ProvidersProps) {
   );
 
   return (
-    // QueryClientProvider disponibiliza o cliente do React Query para todos os componentes
-    <QueryClientProvider client={queryClient}>
-      <CartHydrator />
-      {children}
-      {/* Toaster do Sonner para notificações toast em toda a aplicação */}
-      <Toaster
-        position="top-right"
-        richColors       // Cores diferentes por tipo (success, error, info)
-        closeButton      // Botão para fechar o toast manualmente
-      />
-    </QueryClientProvider>
+    // ThemeProvider habilita o tema claro/escuro via classe no <html>, seguindo a
+    // preferência do sistema por padrão (o CSS de dark mode já existe em globals.css)
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      {/* QueryClientProvider disponibiliza o cliente do React Query para todos os componentes */}
+      <QueryClientProvider client={queryClient}>
+        <CartHydrator />
+        {children}
+        {/* Toaster do Sonner para notificações toast em toda a aplicação */}
+        <Toaster
+          position="top-right"
+          richColors       // Cores diferentes por tipo (success, error, info)
+          closeButton      // Botão para fechar o toast manualmente
+        />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BackButton } from '@/components/ui/back-button';
 import { SearchBar } from '@/components/search/search-bar';
+import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { useAuthStore } from '@/store/auth.store';
 import { useCartStore } from '@/store/cart.store';
 import { cn } from '@/lib/utils';
@@ -55,6 +56,9 @@ export function Header() {
 
           {/* Navegação e ações do header */}
           <nav className="flex items-center gap-2">
+            {/* Alternância de tema claro/escuro */}
+            <ThemeToggle />
+
             {/* Botão da lista de desejos — apenas para usuários logados */}
             {isAuthenticated && (
               <Button variant="ghost" size="icon" asChild>

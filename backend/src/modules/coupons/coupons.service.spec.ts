@@ -37,7 +37,9 @@ describe('CouponsService', () => {
     it('deve lançar BadRequestException se o cupom não existir ou estiver inativo', async () => {
       mockCouponsRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.validate('INEXISTENTE', 100)).rejects.toThrow(BadRequestException);
+      await expect(service.validate('INEXISTENTE', 100)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('deve lançar BadRequestException se o cupom ainda não começou a valer', async () => {
@@ -46,7 +48,9 @@ describe('CouponsService', () => {
         usageCount: 0,
       });
 
-      await expect(service.validate('FUTURO10', 100)).rejects.toThrow(BadRequestException);
+      await expect(service.validate('FUTURO10', 100)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('deve lançar BadRequestException se o cupom estiver expirado', async () => {
@@ -55,19 +59,31 @@ describe('CouponsService', () => {
         usageCount: 0,
       });
 
-      await expect(service.validate('EXPIRADO', 100)).rejects.toThrow(BadRequestException);
+      await expect(service.validate('EXPIRADO', 100)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('deve lançar BadRequestException se o limite de uso foi atingido', async () => {
-      mockCouponsRepo.findOne.mockResolvedValue({ usageLimit: 5, usageCount: 5 });
+      mockCouponsRepo.findOne.mockResolvedValue({
+        usageLimit: 5,
+        usageCount: 5,
+      });
 
-      await expect(service.validate('ESGOTADO', 100)).rejects.toThrow(BadRequestException);
+      await expect(service.validate('ESGOTADO', 100)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('deve lançar BadRequestException se o subtotal for menor que o valor mínimo', async () => {
-      mockCouponsRepo.findOne.mockResolvedValue({ minimumOrderValue: 200, usageCount: 0 });
+      mockCouponsRepo.findOne.mockResolvedValue({
+        minimumOrderValue: 200,
+        usageCount: 0,
+      });
 
-      await expect(service.validate('MIN200', 100)).rejects.toThrow(BadRequestException);
+      await expect(service.validate('MIN200', 100)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('deve retornar o cupom se todas as condições forem satisfeitas', async () => {
@@ -82,7 +98,10 @@ describe('CouponsService', () => {
 
   describe('calculateDiscount', () => {
     it('deve calcular desconto percentual corretamente', async () => {
-      const coupon = { discountType: DiscountType.PERCENTAGE, discountValue: 10 } as Coupon;
+      const coupon = {
+        discountType: DiscountType.PERCENTAGE,
+        discountValue: 10,
+      } as Coupon;
 
       const discount = await service.calculateDiscount(coupon, 200);
 
@@ -102,7 +121,10 @@ describe('CouponsService', () => {
     });
 
     it('não deve permitir desconto fixo maior que o subtotal', async () => {
-      const coupon = { discountType: DiscountType.FIXED, discountValue: 500 } as Coupon;
+      const coupon = {
+        discountType: DiscountType.FIXED,
+        discountValue: 500,
+      } as Coupon;
 
       const discount = await service.calculateDiscount(coupon, 100);
 

@@ -42,6 +42,11 @@ E-commerce completo e escalável construído com NestJS, Next.js e MySQL, com pa
   respostas e registram auditoria **sem nunca expor dados sensíveis**.
 - **Autenticação** por JWT em cookies `httpOnly`. O refresh extrai o usuário do próprio
   token (não confia em `userId` do cliente). Endpoints de auth têm rate limiting estrito.
+- **Proteção de rotas em camadas**: um `middleware.ts` (edge) barra o acesso a `/account/*`
+  e `/admin/*` antes da renderização. Se `JWT_ACCESS_SECRET` estiver disponível no ambiente
+  do frontend, o token é verificado criptograficamente no edge (inclusive o papel admin);
+  caso contrário, faz checagem de presença do cookie. A autorização definitiva é sempre do
+  backend, que valida token e papel em cada requisição.
 - **Pagamentos**: pedidos com cartão criam um `PaymentIntent` no Stripe e retornam o
   `client_secret`; o cartão é confirmado no navegador via Stripe Elements (dados de cartão
   nunca passam pelo servidor). O status do pedido é atualizado via **webhook** do Stripe.

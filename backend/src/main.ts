@@ -2,7 +2,11 @@
 // Configura o servidor HTTP, validação global, Swagger e CORS
 
 import { NestFactory, Reflector } from '@nestjs/core';
-import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Logger,
+  ValidationPipe,
+} from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
@@ -28,9 +32,11 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Adiciona proteção de headers HTTP com Helmet
-  app.use(helmet({
-    crossOriginResourcePolicy: false, // Permite que imagens do backend sejam servidas para o frontend
-  }));
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: false, // Permite que imagens do backend sejam servidas para o frontend
+    }),
+  );
 
   // Habilita CORS para permitir requisições do frontend
   app.enableCors({

@@ -17,7 +17,7 @@ export class UsersService {
     // Repositório TypeORM para operações na tabela users
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-  ) { }
+  ) {}
 
   // Busca todos os usuários — apenas para uso administrativo
   async findAll(page = 1, limit = 20) {

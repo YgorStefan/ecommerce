@@ -24,9 +24,23 @@ const nextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           {
             key: 'Content-Security-Policy',
-            // Política restrita base, permitindo scripts e styles seguros para Next.js no dev,
-            // e bloqueando conexões externas não intencionais
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https: http:; font-src 'self' data:; connect-src 'self' https: http:"
+            // Política base. `script-src`/`style-src` mantêm 'unsafe-inline' porque o
+            // Next.js injeta scripts/estilos inline (nonces exigiriam middleware dedicado).
+            // Stripe.js e seus iframes precisam estar liberados em script-src/frame-src/
+            // connect-src, senão o checkout com cartão é bloqueado pela CSP.
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://js.stripe.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' blob: data: https: http:",
+              "font-src 'self' data:",
+              "connect-src 'self' https: http:",
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'none'",
+              "object-src 'none'",
+            ].join('; '),
           }
         ],
       },

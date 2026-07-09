@@ -5,7 +5,10 @@ import request from 'supertest';
 import { createTestApp, uniqueEmail } from './utils/test-app';
 import { Product } from '../src/modules/products/entities/product.entity';
 import { Category } from '../src/modules/categories/entities/category.entity';
-import { Coupon, DiscountType } from '../src/modules/coupons/entities/coupon.entity';
+import {
+  Coupon,
+  DiscountType,
+} from '../src/modules/coupons/entities/coupon.entity';
 
 describe('Fluxo completo de compra (e2e)', () => {
   let app: INestApplication;
@@ -68,11 +71,19 @@ describe('Fluxo completo de compra (e2e)', () => {
     const email = uniqueEmail('compra');
 
     // 1. Cadastro
-    await agent.post('/api/auth/register').send({ name: 'Comprador E2E', email, password: 'senhaForte123' }).expect(201);
+    await agent
+      .post('/api/auth/register')
+      .send({ name: 'Comprador E2E', email, password: 'senhaForte123' })
+      .expect(201);
 
     // 2. Produto aparece na listagem pública
-    const listRes = await request(server).get('/api/products').query({ search: product.name }).expect(200);
-    expect(listRes.body.data.products.some((p: any) => p.id === product.id)).toBe(true);
+    const listRes = await request(server)
+      .get('/api/products')
+      .query({ search: product.name })
+      .expect(200);
+    expect(
+      listRes.body.data.products.some((p: any) => p.id === product.id),
+    ).toBe(true);
 
     // 3. Adiciona ao carrinho
     const addRes = await agent
@@ -119,17 +130,24 @@ describe('Fluxo completo de compra (e2e)', () => {
 
     // 7. O pedido aparece no histórico do usuário
     const myOrders = await agent.get('/api/orders/me').expect(200);
-    expect(myOrders.body.data.orders.some((o: any) => o.id === order.id)).toBe(true);
+    expect(myOrders.body.data.orders.some((o: any) => o.id === order.id)).toBe(
+      true,
+    );
 
     // 8. O estoque do produto foi decrementado
-    const updatedProduct = await productsRepo.findOne({ where: { id: product.id } });
+    const updatedProduct = await productsRepo.findOne({
+      where: { id: product.id },
+    });
     expect(updatedProduct?.stock).toBe(8);
   });
 
   it('não deve permitir finalizar o pedido com carrinho vazio', async () => {
     const agent = request.agent(server);
     const email = uniqueEmail('carrinho-vazio');
-    await agent.post('/api/auth/register').send({ name: 'Sem Carrinho', email, password: 'senhaForte123' }).expect(201);
+    await agent
+      .post('/api/auth/register')
+      .send({ name: 'Sem Carrinho', email, password: 'senhaForte123' })
+      .expect(201);
 
     await agent
       .post('/api/orders')
@@ -150,7 +168,10 @@ describe('Fluxo completo de compra (e2e)', () => {
   it('não deve permitir adicionar ao carrinho mais unidades do que o estoque disponível', async () => {
     const agent = request.agent(server);
     const email = uniqueEmail('estoque');
-    await agent.post('/api/auth/register').send({ name: 'Estoque', email, password: 'senhaForte123' }).expect(201);
+    await agent
+      .post('/api/auth/register')
+      .send({ name: 'Estoque', email, password: 'senhaForte123' })
+      .expect(201);
 
     await agent
       .post('/api/cart/items')

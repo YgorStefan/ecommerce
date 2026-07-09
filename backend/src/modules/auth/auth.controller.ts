@@ -44,7 +44,7 @@ const ACCESS_COOKIE_OPTIONS = {
 @ApiTags('Autenticação')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   // POST /api/auth/register — cadastro de novo usuário
   @Post('register')
@@ -52,7 +52,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Cadastrar novo usuário' })
   @ApiResponse({ status: 201, description: 'Usuário cadastrado com sucesso' })
   @ApiResponse({ status: 409, description: 'E-mail já cadastrado' })
-  async register(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) res: Response) {
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     // Delega o processamento para o serviço de autenticação
     const result = await this.authService.register(registerDto);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
@@ -66,7 +69,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Realizar login' })
   @ApiResponse({ status: 200, description: 'Login realizado com sucesso' })
   @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
-  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const result = await this.authService.login(loginDto);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
     return { user: result.user };
@@ -78,8 +84,14 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Renovar tokens de acesso' })
   @ApiResponse({ status: 200, description: 'Tokens renovados com sucesso' })
-  @ApiResponse({ status: 401, description: 'Refresh token inválido ou ausente' })
-  async refreshTokens(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+  @ApiResponse({
+    status: 401,
+    description: 'Refresh token inválido ou ausente',
+  })
+  async refreshTokens(
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token missing');
@@ -98,7 +110,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth() // Indica no Swagger que requer token Bearer
   @ApiOperation({ summary: 'Realizar logout' })
-  async logout(@CurrentUser() user: User, @Res({ passthrough: true }) res: Response) {
+  async logout(
+    @CurrentUser() user: User,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     // @CurrentUser() extrai o usuário autenticado da requisição
     await this.authService.logout(user.id);
     res.clearCookie('accessToken', ACCESS_COOKIE_OPTIONS);
@@ -111,11 +126,17 @@ export class AuthController {
   @Throttle(AUTH_THROTTLE)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Solicitar recuperação de senha' })
-  @ApiResponse({ status: 200, description: 'Se o e-mail existir, um link de recuperação será enviado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Se o e-mail existir, um link de recuperação será enviado',
+  })
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     await this.authService.forgotPassword(dto.email);
     // Resposta idêntica independente do e-mail existir ou não (evita enumeração de usuários)
-    return { message: 'Se o e-mail informado estiver cadastrado, você receberá um link de recuperação.' };
+    return {
+      message:
+        'Se o e-mail informado estiver cadastrado, você receberá um link de recuperação.',
+    };
   }
 
   // POST /api/auth/reset-password — redefine a senha usando o token recebido por e-mail
@@ -131,8 +152,18 @@ export class AuthController {
   }
 
   // Define os cookies httpOnly de acesso e renovação com as opções corretas de segurança
-  private setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
-    res.cookie('accessToken', accessToken, { ...ACCESS_COOKIE_OPTIONS, maxAge: 15 * 60 * 1000 });
-    res.cookie('refreshToken', refreshToken, { ...ACCESS_COOKIE_OPTIONS, maxAge: 7 * 24 * 60 * 60 * 1000 });
+  private setAuthCookies(
+    res: Response,
+    accessToken: string,
+    refreshToken: string,
+  ) {
+    res.cookie('accessToken', accessToken, {
+      ...ACCESS_COOKIE_OPTIONS,
+      maxAge: 15 * 60 * 1000,
+    });
+    res.cookie('refreshToken', refreshToken, {
+      ...ACCESS_COOKIE_OPTIONS,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
   }
 }

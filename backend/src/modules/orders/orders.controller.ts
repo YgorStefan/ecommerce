@@ -33,7 +33,7 @@ import { User, UserRole } from '../users/entities/user.entity';
 @UseGuards(JwtAuthGuard) // Todos os endpoints de pedidos exigem autenticação
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) { }
+  constructor(private readonly ordersService: OrdersService) {}
 
   // POST /api/orders — cria um novo pedido a partir do carrinho
   @Post()

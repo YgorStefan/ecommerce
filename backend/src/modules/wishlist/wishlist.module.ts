@@ -12,4 +12,4 @@ import { Product } from '../products/entities/product.entity';
   controllers: [WishlistController],
   providers: [WishlistService],
 })
-export class WishlistModule { }
+export class WishlistModule {}

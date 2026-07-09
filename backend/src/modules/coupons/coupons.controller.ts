@@ -25,7 +25,7 @@ import { UserRole } from '../users/entities/user.entity';
 @ApiTags('Cupons')
 @Controller('coupons')
 export class CouponsController {
-  constructor(private readonly couponsService: CouponsService) { }
+  constructor(private readonly couponsService: CouponsService) {}
 
   // POST /api/coupons/validate — valida um cupom (autenticado)
   @Post('validate')

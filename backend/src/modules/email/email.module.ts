@@ -7,4 +7,4 @@ import { EmailService } from './email.service';
   providers: [EmailService],
   exports: [EmailService], // Exporta para uso em Auth, Orders, etc.
 })
-export class EmailModule { }
+export class EmailModule {}

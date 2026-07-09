@@ -25,9 +25,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const exceptionResponse = isHttpException
-      ? exception.getResponse()
-      : null;
+    const exceptionResponse = isHttpException ? exception.getResponse() : null;
 
     const message = isHttpException
       ? this.extractMessage(exceptionResponse)
@@ -36,13 +34,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Loga apenas metadados da requisição — nunca o body (pode conter senha,
     // dados de cartão ou outras informações sensíveis)
     const logContext = `${request.method} ${request.originalUrl} -> ${status}`;
-    if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+    const messageText = Array.isArray(message) ? message.join(', ') : message;
+    if (status >= 500) {
       this.logger.error(
         logContext,
         exception instanceof Error ? exception.stack : undefined,
       );
-    } else if (status >= HttpStatus.BAD_REQUEST) {
-      this.logger.warn(`${logContext} — ${message}`);
+    } else if (status >= 400) {
+      this.logger.warn(`${logContext} — ${messageText}`);
     }
 
     response.status(status).json({

@@ -13,4 +13,4 @@ import { ProductImage } from './entities/product-image.entity';
   providers: [ProductsService],
   exports: [ProductsService],
 })
-export class ProductsModule { }
+export class ProductsModule {}

@@ -24,7 +24,7 @@ export class ProductsService {
     // Repositório para imagens de produtos
     @InjectRepository(ProductImage)
     private productImagesRepository: Repository<ProductImage>,
-  ) { }
+  ) {}
 
   // Busca produtos com filtros avançados e paginação
   async findAll(queryDto: QueryProductDto) {
@@ -176,10 +176,7 @@ export class ProductsService {
   }
 
   // Atualiza um produto existente
-  async update(
-    id: string,
-    updateDto: UpdateProductDto,
-  ): Promise<Product> {
+  async update(id: string, updateDto: UpdateProductDto): Promise<Product> {
     const product = await this.findOne(id);
 
     // Se o nome foi atualizado, regenera o slug

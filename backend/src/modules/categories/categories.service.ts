@@ -24,7 +24,7 @@ export class CategoriesService {
     // Repositório de produtos para checar vínculos antes de remover uma categoria
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
-  ) { }
+  ) {}
 
   // Retorna todas as categorias ativas para exibição na loja
   async findAll(includeInactive = false): Promise<Category[]> {

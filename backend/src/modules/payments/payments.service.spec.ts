@@ -8,8 +8,14 @@ import Stripe from 'stripe';
 describe('PaymentsService', () => {
   let service: PaymentsService;
 
-  const mockOrdersRepo = { findOne: jest.fn(), save: jest.fn(), update: jest.fn() };
-  const mockEmailService = { sendOrderConfirmation: jest.fn().mockResolvedValue(undefined) };
+  const mockOrdersRepo = {
+    findOne: jest.fn(),
+    save: jest.fn(),
+    update: jest.fn(),
+  };
+  const mockEmailService = {
+    sendOrderConfirmation: jest.fn().mockResolvedValue(undefined),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -47,7 +53,10 @@ describe('PaymentsService', () => {
     });
 
     it('deve ser idempotente — não reprocessa um pedido já pago', async () => {
-      mockOrdersRepo.findOne.mockResolvedValue({ id: 'o1', paymentStatus: PaymentStatus.PAID });
+      mockOrdersRepo.findOne.mockResolvedValue({
+        id: 'o1',
+        paymentStatus: PaymentStatus.PAID,
+      });
 
       await service.handlePaymentIntentSucceeded(buildPaymentIntent('o1'));
 
@@ -56,7 +65,11 @@ describe('PaymentsService', () => {
     });
 
     it('deve marcar o pedido como pago e enviar e-mail de confirmação', async () => {
-      const order = { id: 'o1', paymentStatus: PaymentStatus.PENDING, user: {} };
+      const order = {
+        id: 'o1',
+        paymentStatus: PaymentStatus.PENDING,
+        user: {},
+      };
       mockOrdersRepo.findOne.mockResolvedValue(order);
 
       await service.handlePaymentIntentSucceeded(buildPaymentIntent('o1'));
@@ -79,7 +92,10 @@ describe('PaymentsService', () => {
 
       expect(mockOrdersRepo.update).toHaveBeenCalledWith(
         'o1',
-        expect.objectContaining({ paymentStatus: PaymentStatus.FAILED, paymentIntentId: 'pi_123' }),
+        expect.objectContaining({
+          paymentStatus: PaymentStatus.FAILED,
+          paymentIntentId: 'pi_123',
+        }),
       );
     });
   });

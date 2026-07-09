@@ -22,9 +22,12 @@ export class StripeService {
       );
     }
 
-    this.client = new Stripe(secretKey || 'sk_test_placeholder_not_configured', {
-      apiVersion: '2026-06-24.dahlia',
-    });
+    this.client = new Stripe(
+      secretKey || 'sk_test_placeholder_not_configured',
+      {
+        apiVersion: '2026-06-24.dahlia',
+      },
+    );
   }
 
   // Cria um PaymentIntent para o valor total do pedido (em centavos)
@@ -48,6 +51,10 @@ export class StripeService {
     signature: string,
     webhookSecret: string,
   ): Stripe.Event {
-    return this.client.webhooks.constructEvent(payload, signature, webhookSecret);
+    return this.client.webhooks.constructEvent(
+      payload,
+      signature,
+      webhookSecret,
+    );
   }
 }

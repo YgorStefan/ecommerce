@@ -10,6 +10,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Review } from './entities/review.entity';
 import { Product } from '../products/entities/product.entity';
+import { OrderItem } from '../orders/entities/order-item.entity';
+import { PaymentStatus } from '../orders/entities/order.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
 
 export { CreateReviewDto };
@@ -19,7 +21,10 @@ export { CreateReviewDto };
 // necessários para exibição do autor, nunca dados de contato/pessoais.
 export function toPublicReview(review: Review): Review {
   if (review.user) {
-    review.user = { id: review.user.id, name: review.user.name } as typeof review.user;
+    review.user = {
+      id: review.user.id,
+      name: review.user.name,
+    } as typeof review.user;
   }
   return review;
 }
@@ -33,7 +38,10 @@ export class ReviewsService {
     // Repositório dos produtos para atualizar a média de avaliações
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
-  ) { }
+    // Itens de pedido — usados para saber se o autor realmente comprou o produto
+    @InjectRepository(OrderItem)
+    private orderItemsRepository: Repository<OrderItem>,
+  ) {}
 
   // Cria uma avaliação para um produto
   async create(
@@ -58,10 +66,23 @@ export class ReviewsService {
       throw new ConflictException('Você já avaliou este produto');
     }
 
+    // Marca como "compra verificada" quando o usuário possui um pedido pago
+    // contendo este produto — o selo reflete a realidade, nunca é assumido
+    const purchasedCount = await this.orderItemsRepository
+      .createQueryBuilder('item')
+      .innerJoin('item.order', 'order')
+      .where('item.productId = :productId', {
+        productId: createReviewDto.productId,
+      })
+      .andWhere('order.userId = :userId', { userId })
+      .andWhere('order.paymentStatus = :paid', { paid: PaymentStatus.PAID })
+      .getCount();
+
     // Cria a avaliação
     const review = this.reviewsRepository.create({
       userId,
       ...createReviewDto,
+      isVerifiedPurchase: purchasedCount > 0,
     });
 
     const savedReview = await this.reviewsRepository.save(review);

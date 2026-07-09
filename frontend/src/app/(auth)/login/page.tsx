@@ -44,8 +44,11 @@ export default function LoginPage() {
     try {
       await login(data.email, data.password);
       toast.success('Login realizado com sucesso!');
-      // Redireciona para a home após o login
-      router.push('/');
+      // Honra o destino original quando o middleware redirecionou para o login;
+      // aceita apenas caminhos internos para evitar open redirect
+      const redirect = new URLSearchParams(window.location.search).get('redirect');
+      const target = redirect && redirect.startsWith('/') ? redirect : '/';
+      router.push(target);
     } catch (error: any) {
       // Exibe a mensagem de erro retornada pela API
       toast.error(

@@ -36,7 +36,7 @@ export class AuthService {
     private configService: ConfigService,
     // Serviço de e-mail para enviar confirmações
     private emailService: EmailService,
-  ) { }
+  ) {}
 
   // Registra um novo usuário no sistema
   async register(registerDto: RegisterDto) {
@@ -127,7 +127,9 @@ export class AuthService {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       });
     } catch {
-      throw new UnauthorizedException('Token de renovação inválido ou expirado');
+      throw new UnauthorizedException(
+        'Token de renovação inválido ou expirado',
+      );
     }
 
     // Busca o usuário pelo ID contido no token
@@ -162,7 +164,9 @@ export class AuthService {
   // Sempre retorna sucesso (mesma resposta exista ou não o e-mail) para não
   // permitir que um atacante descubra quais e-mails estão cadastrados
   async forgotPassword(email: string): Promise<void> {
-    const user = await this.usersRepository.findOne({ where: { email, isActive: true } });
+    const user = await this.usersRepository.findOne({
+      where: { email, isActive: true },
+    });
 
     if (!user) {
       return;
@@ -177,7 +181,10 @@ export class AuthService {
       resetPasswordExpires: new Date(Date.now() + RESET_TOKEN_TTL_MS),
     });
 
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
+    const frontendUrl = this.configService.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:3000',
+    );
     const resetUrl = `${frontendUrl}/reset-password?token=${rawToken}`;
 
     await this.emailService.sendPasswordResetEmail(user, resetUrl).catch(() => {

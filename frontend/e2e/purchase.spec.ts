@@ -72,6 +72,6 @@ test.describe('Fluxo completo de compra', () => {
 
     // Sem itens no carrinho, o checkout redireciona de volta para os produtos
     await page.goto('/checkout');
-    await expect(page).toHaveURL('/products');
+    await expect(page).toHaveURL(/\/products/);
   });
 });

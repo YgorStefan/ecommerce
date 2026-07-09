@@ -12,7 +12,7 @@ import { User } from '../../users/entities/user.entity';
 export interface JwtPayload {
   sub: string; // ID do usuário
   email: string; // E-mail do usuário
-  role: string; // Papel do usuário 
+  role: string; // Papel do usuário
 }
 
 @Injectable()

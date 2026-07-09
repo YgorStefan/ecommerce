@@ -22,7 +22,7 @@ import { User, UserRole } from '../users/entities/user.entity';
 @ApiTags('Avaliações')
 @Controller('reviews')
 export class ReviewsController {
-  constructor(private readonly reviewsService: ReviewsService) { }
+  constructor(private readonly reviewsService: ReviewsService) {}
 
   // GET /api/reviews/product/:productId — lista avaliações de um produto
   @Get('product/:productId')

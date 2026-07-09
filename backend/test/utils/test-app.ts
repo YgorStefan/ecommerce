@@ -3,7 +3,11 @@
 // exerçam o comportamento real da API (validação, filtros, interceptors).
 
 import { Test } from '@nestjs/testing';
-import { INestApplication, ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
+import {
+  INestApplication,
+  ValidationPipe,
+  ClassSerializerInterceptor,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { AppModule } from '../../src/app.module';

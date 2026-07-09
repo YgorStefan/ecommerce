@@ -15,7 +15,7 @@ export class PaymentsService {
     @InjectRepository(Order)
     private ordersRepository: Repository<Order>,
     private emailService: EmailService,
-  ) { }
+  ) {}
 
   // Chamado quando o Stripe confirma que o pagamento foi concluído com sucesso
   async handlePaymentIntentSucceeded(
@@ -35,7 +35,9 @@ export class PaymentsService {
     });
 
     if (!order) {
-      this.logger.warn(`Pedido ${orderId} não encontrado para o webhook do Stripe`);
+      this.logger.warn(
+        `Pedido ${orderId} não encontrado para o webhook do Stripe`,
+      );
       return;
     }
 

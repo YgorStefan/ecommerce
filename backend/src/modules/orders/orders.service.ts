@@ -27,7 +27,10 @@ import { Product } from '../products/entities/product.entity';
 
 // Métodos de pagamento processados via Stripe (cartão) — PIX e boleto continuam
 // com o fluxo simulado já existente (confirmados como pagos imediatamente)
-const CARD_PAYMENT_METHODS = [PaymentMethod.CREDIT_CARD, PaymentMethod.DEBIT_CARD];
+const CARD_PAYMENT_METHODS = [
+  PaymentMethod.CREDIT_CARD,
+  PaymentMethod.DEBIT_CARD,
+];
 
 export interface CreateOrderResult {
   order: Order;
@@ -65,7 +68,7 @@ export class OrdersService {
     private stripeService: StripeService,
     // Conexão com o banco de dados para gerenciar transações
     private dataSource: DataSource,
-  ) { }
+  ) {}
 
   // Cria um pedido a partir do carrinho do usuário utilizando Transaction para consistência e Locks para prevenir Race Conditions
   async create(
@@ -131,10 +134,14 @@ export class OrdersService {
       for (const cartItem of cart.items) {
         const product = lockedProducts.find((p) => p.id === cartItem.productId);
         if (!product) {
-          throw new NotFoundException(`Produto com ID ${cartItem.productId} não encontrado.`);
+          throw new NotFoundException(
+            `Produto com ID ${cartItem.productId} não encontrado.`,
+          );
         }
         if (product.stock < cartItem.quantity) {
-          throw new BadRequestException(`Estoque insuficiente para o produto: ${product.name}`);
+          throw new BadRequestException(
+            `Estoque insuficiente para o produto: ${product.name}`,
+          );
         }
         // Subtrai da entidade lockada em runtime
         product.stock -= cartItem.quantity;
@@ -173,7 +180,9 @@ export class OrdersService {
         shippingCost,
         total,
         couponId,
-        paymentStatus: isCardPayment ? PaymentStatus.PENDING : PaymentStatus.PAID,
+        paymentStatus: isCardPayment
+          ? PaymentStatus.PENDING
+          : PaymentStatus.PAID,
       });
 
       savedOrder = await queryRunner.manager.save(Order, order);
@@ -226,7 +235,7 @@ export class OrdersService {
       clientSecret = paymentIntent.client_secret ?? undefined;
     } else {
       // PIX/boleto já nascem "pagos" no fluxo simulado atual — envia a confirmação
-      this.emailService.sendOrderConfirmation(user, fullOrder).catch(() => { });
+      this.emailService.sendOrderConfirmation(user, fullOrder).catch(() => {});
     }
 
     return { order: fullOrder, clientSecret };
@@ -313,7 +322,7 @@ export class OrdersService {
     // Notifica o cliente sobre a mudança de status por e-mail
     this.emailService
       .sendOrderStatusUpdate(order.user, updatedOrder)
-      .catch(() => { });
+      .catch(() => {});
 
     return updatedOrder;
   }

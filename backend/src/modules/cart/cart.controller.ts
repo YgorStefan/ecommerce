@@ -25,7 +25,7 @@ import { User } from '../users/entities/user.entity';
 @UseGuards(JwtAuthGuard) // Todos os endpoints do carrinho exigem autenticação
 @Controller('cart')
 export class CartController {
-  constructor(private readonly cartService: CartService) { }
+  constructor(private readonly cartService: CartService) {}
 
   // GET /api/cart — obtém o carrinho do usuário autenticado
   @Get()
@@ -37,10 +37,7 @@ export class CartController {
   // POST /api/cart/items — adiciona um produto ao carrinho
   @Post('items')
   @ApiOperation({ summary: 'Adicionar item ao carrinho' })
-  addItem(
-    @CurrentUser() user: User,
-    @Body() body: AddCartItemDto,
-  ) {
+  addItem(@CurrentUser() user: User, @Body() body: AddCartItemDto) {
     return this.cartService.addItem(user.id, body.productId, body.quantity);
   }
 

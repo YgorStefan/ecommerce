@@ -33,7 +33,7 @@ import { User, UserRole } from './entities/user.entity';
 @UseGuards(JwtAuthGuard) // Aplica o guard JWT em todos os métodos
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   // GET /api/users/me — retorna o perfil do usuário autenticado
   @Get('me')
@@ -56,10 +56,7 @@ export class UsersController {
   // POST /api/users/me/change-password — altera a senha do usuário
   @Post('me/change-password')
   @ApiOperation({ summary: 'Alterar senha do usuário' })
-  changePassword(
-    @CurrentUser() user: User,
-    @Body() body: ChangePasswordDto,
-  ) {
+  changePassword(@CurrentUser() user: User, @Body() body: ChangePasswordDto) {
     return this.usersService.changePassword(
       user.id,
       body.currentPassword,

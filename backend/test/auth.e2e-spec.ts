@@ -33,12 +33,17 @@ describe('Autenticação (e2e)', () => {
     expect(cookies.some((c) => c.startsWith('accessToken='))).toBe(true);
     expect(cookies.some((c) => c.startsWith('refreshToken='))).toBe(true);
     // Cookies de autenticação devem ser httpOnly
-    expect(cookies.every((c) => c.toLowerCase().includes('httponly'))).toBe(true);
+    expect(cookies.every((c) => c.toLowerCase().includes('httponly'))).toBe(
+      true,
+    );
   });
 
   it('não deve permitir cadastro duplicado com o mesmo e-mail', async () => {
     const email = uniqueEmail('duplicado');
-    await request(server).post('/api/auth/register').send({ name: 'Fulano', email, password }).expect(201);
+    await request(server)
+      .post('/api/auth/register')
+      .send({ name: 'Fulano', email, password })
+      .expect(201);
 
     await request(server)
       .post('/api/auth/register')
@@ -55,16 +60,25 @@ describe('Autenticação (e2e)', () => {
 
   it('deve autenticar com credenciais válidas', async () => {
     const email = uniqueEmail('login');
-    await request(server).post('/api/auth/register').send({ name: 'Login User', email, password }).expect(201);
+    await request(server)
+      .post('/api/auth/register')
+      .send({ name: 'Login User', email, password })
+      .expect(201);
 
-    const res = await request(server).post('/api/auth/login').send({ email, password }).expect(200);
+    const res = await request(server)
+      .post('/api/auth/login')
+      .send({ email, password })
+      .expect(200);
 
     expect(res.body.data.user.email).toBe(email);
   });
 
   it('deve rejeitar credenciais inválidas', async () => {
     const email = uniqueEmail('invalido');
-    await request(server).post('/api/auth/register').send({ name: 'Fulano X', email, password }).expect(201);
+    await request(server)
+      .post('/api/auth/register')
+      .send({ name: 'Fulano X', email, password })
+      .expect(201);
 
     await request(server)
       .post('/api/auth/login')
@@ -80,7 +94,10 @@ describe('Autenticação (e2e)', () => {
     const email = uniqueEmail('sessao');
     const agent = request.agent(server);
 
-    await agent.post('/api/auth/register').send({ name: 'Sessão', email, password }).expect(201);
+    await agent
+      .post('/api/auth/register')
+      .send({ name: 'Sessão', email, password })
+      .expect(201);
 
     const me = await agent.get('/api/users/me').expect(200);
     expect(me.body.data.email).toBe(email);
@@ -96,7 +113,10 @@ describe('Autenticação (e2e)', () => {
 
   it('forgot-password deve sempre responder com sucesso, exista ou não o e-mail (evita enumeração)', async () => {
     const existente = uniqueEmail('esqueci');
-    await request(server).post('/api/auth/register').send({ name: 'Fulano Y', email: existente, password }).expect(201);
+    await request(server)
+      .post('/api/auth/register')
+      .send({ name: 'Fulano Y', email: existente, password })
+      .expect(201);
 
     const resExistente = await request(server)
       .post('/api/auth/forgot-password')
@@ -108,7 +128,9 @@ describe('Autenticação (e2e)', () => {
       .send({ email: uniqueEmail('naoexiste') })
       .expect(200);
 
-    expect(resExistente.body.data.message).toBe(resInexistente.body.data.message);
+    expect(resExistente.body.data.message).toBe(
+      resInexistente.body.data.message,
+    );
   });
 
   it('reset-password deve rejeitar um token inválido', async () => {

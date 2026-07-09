@@ -22,7 +22,9 @@ export class LoggingInterceptor implements NestInterceptor {
     const response = context.switchToHttp().getResponse<Response>();
     const { method, originalUrl } = request;
     const start = Date.now();
-    const user = (request as any).user as { id?: string; email?: string } | undefined;
+    const user = (request as any).user as
+      | { id?: string; email?: string }
+      | undefined;
 
     return next.handle().pipe(
       tap(() => {

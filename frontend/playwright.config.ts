@@ -43,7 +43,13 @@ export default defineConfig({
       command: 'npm run build && npm run start -- -p 3900',
       cwd: __dirname,
       url: 'http://localhost:3900',
-      env: { PORT: '3900', NEXT_PUBLIC_API_URL: 'http://localhost:3901' },
+      // JWT_ACCESS_SECRET igual ao do backend de teste (setup-e2e.ts) para que o
+      // middleware verifique o token no edge e exercite o gate de papel admin
+      env: {
+        PORT: '3900',
+        NEXT_PUBLIC_API_URL: 'http://localhost:3901',
+        JWT_ACCESS_SECRET: 'test-access-secret',
+      },
       reuseExistingServer: !process.env.CI,
       timeout: 180000,
     },

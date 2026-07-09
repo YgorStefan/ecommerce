@@ -2,7 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  ConflictException,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { AuthService } from './auth.service';
 import { User } from '../users/entities/user.entity';
@@ -23,7 +27,9 @@ describe('AuthService', () => {
     signAsync: jest.fn().mockResolvedValue('signed-token'),
     verifyAsync: jest.fn(),
   };
-  const mockConfigService = { get: jest.fn((key: string, fallback?: any) => fallback) };
+  const mockConfigService = {
+    get: jest.fn((key: string, fallback?: any) => fallback),
+  };
   const mockEmailService = {
     sendWelcomeEmail: jest.fn().mockResolvedValue(undefined),
     sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
@@ -53,14 +59,22 @@ describe('AuthService', () => {
       mockUsersRepo.findOne.mockResolvedValue({ id: 'u1' });
 
       await expect(
-        service.register({ name: 'João', email: 'joao@test.com', password: 'senha1234' } as any),
+        service.register({
+          name: 'João',
+          email: 'joao@test.com',
+          password: 'senha1234',
+        } as any),
       ).rejects.toThrow(ConflictException);
     });
 
     it('deve criar usuário, carrinho vazio e retornar tokens', async () => {
       mockUsersRepo.findOne.mockResolvedValue(null);
       mockUsersRepo.create.mockReturnValue({ email: 'joao@test.com' });
-      mockUsersRepo.save.mockResolvedValue({ id: 'u1', email: 'joao@test.com', name: 'João' });
+      mockUsersRepo.save.mockResolvedValue({
+        id: 'u1',
+        email: 'joao@test.com',
+        name: 'João',
+      });
       mockCartsRepo.create.mockReturnValue({ userId: 'u1' });
       mockCartsRepo.save.mockResolvedValue({ id: 'c1', userId: 'u1' });
 
@@ -75,7 +89,10 @@ describe('AuthService', () => {
       expect(result.accessToken).toBe('signed-token');
       expect(result.refreshToken).toBe('signed-token');
       // O hash do refresh token deve ser persistido no usuário
-      expect(mockUsersRepo.update).toHaveBeenCalledWith('u1', expect.objectContaining({ refreshToken: expect.any(String) }));
+      expect(mockUsersRepo.update).toHaveBeenCalledWith(
+        'u1',
+        expect.objectContaining({ refreshToken: expect.any(String) }),
+      );
     });
   });
 
@@ -90,7 +107,11 @@ describe('AuthService', () => {
 
     it('deve lançar UnauthorizedException se a senha estiver incorreta', async () => {
       const hashed = await bcrypt.hash('senhaCorreta', 10);
-      mockUsersRepo.findOne.mockResolvedValue({ id: 'u1', email: 'joao@test.com', password: hashed });
+      mockUsersRepo.findOne.mockResolvedValue({
+        id: 'u1',
+        email: 'joao@test.com',
+        password: hashed,
+      });
 
       await expect(
         service.login({ email: 'joao@test.com', password: 'senhaErrada' }),
@@ -99,9 +120,16 @@ describe('AuthService', () => {
 
     it('deve autenticar com sucesso e retornar tokens', async () => {
       const hashed = await bcrypt.hash('senhaCorreta', 10);
-      mockUsersRepo.findOne.mockResolvedValue({ id: 'u1', email: 'joao@test.com', password: hashed });
+      mockUsersRepo.findOne.mockResolvedValue({
+        id: 'u1',
+        email: 'joao@test.com',
+        password: hashed,
+      });
 
-      const result = await service.login({ email: 'joao@test.com', password: 'senhaCorreta' });
+      const result = await service.login({
+        email: 'joao@test.com',
+        password: 'senhaCorreta',
+      });
 
       expect(result.accessToken).toBe('signed-token');
       expect(result.user.id).toBe('u1');
@@ -112,28 +140,40 @@ describe('AuthService', () => {
     it('deve rejeitar um token com assinatura inválida', async () => {
       mockJwtService.verifyAsync.mockRejectedValue(new Error('invalid'));
 
-      await expect(service.refreshTokens('token-invalido')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshTokens('token-invalido')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('deve rejeitar se o usuário não tiver refresh token salvo', async () => {
       mockJwtService.verifyAsync.mockResolvedValue({ sub: 'u1' });
       mockUsersRepo.findOne.mockResolvedValue({ id: 'u1', refreshToken: null });
 
-      await expect(service.refreshTokens('token-valido')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshTokens('token-valido')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('deve rejeitar se o token não corresponder ao hash salvo', async () => {
       mockJwtService.verifyAsync.mockResolvedValue({ sub: 'u1' });
       const storedHash = await bcrypt.hash('outro-token', 10);
-      mockUsersRepo.findOne.mockResolvedValue({ id: 'u1', refreshToken: storedHash });
+      mockUsersRepo.findOne.mockResolvedValue({
+        id: 'u1',
+        refreshToken: storedHash,
+      });
 
-      await expect(service.refreshTokens('token-valido')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshTokens('token-valido')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('deve gerar novos tokens quando o refresh token é válido', async () => {
       mockJwtService.verifyAsync.mockResolvedValue({ sub: 'u1' });
       const storedHash = await bcrypt.hash('token-valido', 10);
-      mockUsersRepo.findOne.mockResolvedValue({ id: 'u1', refreshToken: storedHash });
+      mockUsersRepo.findOne.mockResolvedValue({
+        id: 'u1',
+        refreshToken: storedHash,
+      });
 
       const result = await service.refreshTokens('token-valido');
 
@@ -152,7 +192,11 @@ describe('AuthService', () => {
     });
 
     it('deve gerar token, salvar o hash e enviar o e-mail se o usuário existir', async () => {
-      mockUsersRepo.findOne.mockResolvedValue({ id: 'u1', email: 'joao@test.com', name: 'João' });
+      mockUsersRepo.findOne.mockResolvedValue({
+        id: 'u1',
+        email: 'joao@test.com',
+        name: 'João',
+      });
 
       await service.forgotPassword('joao@test.com');
 
@@ -171,9 +215,9 @@ describe('AuthService', () => {
     it('deve lançar BadRequestException se o token for inválido ou expirado', async () => {
       mockUsersRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.resetPassword('token-invalido', 'novaSenha123')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.resetPassword('token-invalido', 'novaSenha123'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('deve redefinir a senha e invalidar o refresh token existente', async () => {

@@ -87,7 +87,10 @@ export class Order {
 
   // ID do PaymentIntent no Stripe — usado para correlacionar o webhook ao pedido
   // (apenas preenchido para pagamentos com cartão, processados via Stripe)
-  @ApiProperty({ description: 'ID do PaymentIntent no Stripe', required: false })
+  @ApiProperty({
+    description: 'ID do PaymentIntent no Stripe',
+    required: false,
+  })
   @Column({ nullable: true, length: 100 })
   paymentIntentId: string;
 

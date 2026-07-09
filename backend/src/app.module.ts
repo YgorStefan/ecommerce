@@ -33,11 +33,13 @@ import { PaymentsModule } from './modules/payments/payments.module';
     // ThrottlerModule: proteção contra ataques de força-bruta (Rate Limiting)
     // Desativado em ambiente de teste (e2e) para não derrubar suítes que fazem
     // múltiplas chamadas seguidas às mesmas rotas (ex.: vários cadastros de usuário)
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 100, // Limita a 100 requisições por minuto por IP
-      skipIf: () => process.env.NODE_ENV === 'test',
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100, // Limita a 100 requisições por minuto por IP
+        skipIf: () => process.env.NODE_ENV === 'test',
+      },
+    ]),
 
     // TypeOrmModule: configura a conexão com o banco de dados MySQL
     TypeOrmModule.forRootAsync({
@@ -85,4 +87,4 @@ import { PaymentsModule } from './modules/payments/payments.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

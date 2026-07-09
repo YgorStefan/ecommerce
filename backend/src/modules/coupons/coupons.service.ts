@@ -18,7 +18,7 @@ export class CouponsService {
     // Repositório TypeORM para operações na tabela coupons
     @InjectRepository(Coupon)
     private couponsRepository: Repository<Coupon>,
-  ) { }
+  ) {}
 
   // Cria um novo cupom de desconto
   async create(createCouponDto: CreateCouponDto): Promise<Coupon> {

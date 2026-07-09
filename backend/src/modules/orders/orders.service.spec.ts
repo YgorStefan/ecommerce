@@ -33,7 +33,12 @@ describe('OrdersService', () => {
     createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
   };
 
-  const mockOrderRepo = { create: jest.fn(), save: jest.fn(), findAndCount: jest.fn(), update: jest.fn() };
+  const mockOrderRepo = {
+    create: jest.fn(),
+    save: jest.fn(),
+    findAndCount: jest.fn(),
+    update: jest.fn(),
+  };
   const mockOrderItemRepo = { create: jest.fn(), save: jest.fn() };
   const mockCartService = { getCart: jest.fn(), clearCart: jest.fn() };
   const mockCouponsService = {
@@ -42,9 +47,13 @@ describe('OrdersService', () => {
     incrementUsageIfAllowed: jest.fn().mockResolvedValue(true),
   };
   const mockProductsService = { updateStock: jest.fn() };
-  const mockEmailService = { sendOrderConfirmation: jest.fn().mockResolvedValue(true) };
+  const mockEmailService = {
+    sendOrderConfirmation: jest.fn().mockResolvedValue(true),
+  };
   const mockStripeService = {
-    createPaymentIntent: jest.fn().mockResolvedValue({ id: 'pi_1', client_secret: 'secret_1' }),
+    createPaymentIntent: jest
+      .fn()
+      .mockResolvedValue({ id: 'pi_1', client_secret: 'secret_1' }),
   };
 
   beforeEach(async () => {
@@ -76,7 +85,11 @@ describe('OrdersService', () => {
   it('create() should throw an error if cart is empty', async () => {
     mockCartService.getCart.mockResolvedValue({ items: [] });
     await expect(
-      service.create({ id: 'user1' } as any, { paymentMethod: PaymentMethod.PIX, shippingAddress: {} as any, notes: '' })
+      service.create({ id: 'user1' } as any, {
+        paymentMethod: PaymentMethod.PIX,
+        shippingAddress: {} as any,
+        notes: '',
+      }),
     ).rejects.toThrow(BadRequestException);
 
     // Transacao nem deve começar
@@ -86,8 +99,8 @@ describe('OrdersService', () => {
   it('create() should perform checkout transaction successfully', async () => {
     const cart = {
       items: [
-        { productId: 'p1', quantity: 2, product: { name: 'P1', price: 100 } }
-      ]
+        { productId: 'p1', quantity: 2, product: { name: 'P1', price: 100 } },
+      ],
     };
     mockCartService.getCart.mockResolvedValue(cart);
     mockQueryRunner.manager.find.mockResolvedValue([{ id: 'p1', stock: 10 }]);
@@ -96,7 +109,10 @@ describe('OrdersService', () => {
 
     jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'o1' } as any);
 
-    const result = await service.create({ id: 'user1' } as any, { paymentMethod: PaymentMethod.CREDIT_CARD, shippingAddress: {} as any });
+    const result = await service.create({ id: 'user1' } as any, {
+      paymentMethod: PaymentMethod.CREDIT_CARD,
+      shippingAddress: {} as any,
+    });
 
     expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
     expect(mockQueryRunner.manager.save).toHaveBeenCalled();
@@ -111,15 +127,20 @@ describe('OrdersService', () => {
   it('create() should throw an error and rollback if stock is missing', async () => {
     const cart = {
       items: [
-        { productId: 'p1', quantity: 5, product: { name: 'P1', price: 100 } }
-      ]
+        { productId: 'p1', quantity: 5, product: { name: 'P1', price: 100 } },
+      ],
     };
     mockCartService.getCart.mockResolvedValue(cart);
     // Retorna stock 2
-    mockQueryRunner.manager.find.mockResolvedValue([{ id: 'p1', stock: 2, name: 'P1' }]);
+    mockQueryRunner.manager.find.mockResolvedValue([
+      { id: 'p1', stock: 2, name: 'P1' },
+    ]);
 
     await expect(
-      service.create({ id: 'user1' } as any, { paymentMethod: PaymentMethod.CREDIT_CARD, shippingAddress: {} as any })
+      service.create({ id: 'user1' } as any, {
+        paymentMethod: PaymentMethod.CREDIT_CARD,
+        shippingAddress: {} as any,
+      }),
     ).rejects.toThrow(BadRequestException);
 
     expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
