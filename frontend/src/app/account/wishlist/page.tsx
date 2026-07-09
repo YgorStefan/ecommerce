@@ -2,8 +2,9 @@
 
 'use client';
 
+import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Heart, Trash2 } from 'lucide-react';
+import { Heart, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product/product-card';
 import { wishlistService } from '@/services/api';
@@ -14,7 +15,7 @@ export default function WishlistPage() {
   const queryClient = useQueryClient();
 
   // Busca os itens da lista de desejos
-  const { data: items = [], isLoading } = useQuery({
+  const { data: items = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['wishlist'],
     queryFn: () => wishlistService.getAll(),
     select: (res) => res.data.data as WishlistItem[],
@@ -51,6 +52,13 @@ export default function WishlistPage() {
             <div key={i} className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
           ))}
         </div>
+      ) : isError ? (
+        // Estado de erro com opção de tentar novamente
+        <div className="text-center py-16 space-y-4">
+          <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground/40" />
+          <p className="text-muted-foreground">Não foi possível carregar sua lista de desejos.</p>
+          <Button variant="outline" onClick={() => refetch()}>Tentar novamente</Button>
+        </div>
       ) : items.length > 0 ? (
         // Grade de produtos na wishlist com botão de remover
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -61,6 +69,7 @@ export default function WishlistPage() {
               <button
                 onClick={() => removeMutation.mutate(item.productId)}
                 className="absolute top-2 left-2 h-8 w-8 rounded-full bg-background/80 backdrop-blur flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors z-10"
+                aria-label="Remover da lista de desejos"
                 title="Remover da lista de desejos"
               >
                 <Trash2 className="h-4 w-4" />
@@ -70,12 +79,17 @@ export default function WishlistPage() {
         </div>
       ) : (
         // Estado vazio da wishlist
-        <div className="text-center py-16">
-          <Heart className="h-16 w-16 mx-auto text-muted-foreground/40 mb-4" />
-          <p className="text-muted-foreground">Sua lista de desejos está vazia.</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Explore os produtos e adicione os que desejar!
-          </p>
+        <div className="text-center py-16 space-y-4">
+          <Heart className="h-16 w-16 mx-auto text-muted-foreground/40" />
+          <div>
+            <p className="text-muted-foreground">Sua lista de desejos está vazia.</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Explore os produtos e adicione os que desejar!
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/products">Explorar produtos</Link>
+          </Button>
         </div>
       )}
     </div>

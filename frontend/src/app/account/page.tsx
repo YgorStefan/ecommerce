@@ -28,8 +28,8 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 // Schema para alteração de senha
 const passwordSchema = z
   .object({
-    currentPassword: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
-    newPassword: z.string().min(6, 'Nova senha deve ter pelo menos 6 caracteres'),
+    currentPassword: z.string().min(1, 'Informe sua senha atual'),
+    newPassword: z.string().min(8, 'Nova senha deve ter pelo menos 8 caracteres'),
     confirmNewPassword: z.string(),
   })
   .refine((d) => d.newPassword === d.confirmNewPassword, {
@@ -99,8 +99,8 @@ export default function AccountPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Nome */}
               <div className="space-y-2 md:col-span-2">
-                <Label>Nome Completo</Label>
-                <Input {...profileForm.register('name')} />
+                <Label htmlFor="profile-name">Nome Completo</Label>
+                <Input id="profile-name" {...profileForm.register('name')} />
                 {profileForm.formState.errors.name && (
                   <p className="text-sm text-destructive">{profileForm.formState.errors.name.message}</p>
                 )}
@@ -108,39 +108,39 @@ export default function AccountPage() {
 
               {/* E-mail — apenas exibição */}
               <div className="space-y-2">
-                <Label>E-mail</Label>
-                <Input value={user?.email} disabled className="opacity-60" />
+                <Label htmlFor="profile-email">E-mail</Label>
+                <Input id="profile-email" value={user?.email} disabled className="opacity-60" />
                 <p className="text-xs text-muted-foreground">O e-mail não pode ser alterado</p>
               </div>
 
               {/* Telefone */}
               <div className="space-y-2">
-                <Label>Telefone</Label>
-                <Input placeholder="(11) 99999-9999" {...profileForm.register('phone')} />
+                <Label htmlFor="profile-phone">Telefone</Label>
+                <Input id="profile-phone" placeholder="(11) 99999-9999" {...profileForm.register('phone')} />
               </div>
 
               {/* Endereço */}
               <div className="space-y-2 md:col-span-2">
-                <Label>Endereço</Label>
-                <Input placeholder="Rua, número, complemento" {...profileForm.register('address')} />
+                <Label htmlFor="profile-address">Endereço</Label>
+                <Input id="profile-address" placeholder="Rua, número, complemento" {...profileForm.register('address')} />
               </div>
 
               {/* Cidade */}
               <div className="space-y-2">
-                <Label>Cidade</Label>
-                <Input {...profileForm.register('city')} />
+                <Label htmlFor="profile-city">Cidade</Label>
+                <Input id="profile-city" {...profileForm.register('city')} />
               </div>
 
               {/* Estado */}
               <div className="space-y-2">
-                <Label>Estado</Label>
-                <Input placeholder="SP" maxLength={2} {...profileForm.register('state')} />
+                <Label htmlFor="profile-state">Estado</Label>
+                <Input id="profile-state" placeholder="SP" maxLength={2} {...profileForm.register('state')} />
               </div>
 
               {/* CEP */}
               <div className="space-y-2">
-                <Label>CEP</Label>
-                <Input placeholder="00000-000" {...profileForm.register('zipCode')} />
+                <Label htmlFor="profile-zipCode">CEP</Label>
+                <Input id="profile-zipCode" placeholder="00000-000" {...profileForm.register('zipCode')} />
               </div>
             </div>
 
@@ -159,22 +159,22 @@ export default function AccountPage() {
         <CardContent>
           <form onSubmit={passwordForm.handleSubmit(onChangePassword)} className="space-y-4 max-w-md">
             <div className="space-y-2">
-              <Label>Senha Atual</Label>
-              <Input type="password" {...passwordForm.register('currentPassword')} />
+              <Label htmlFor="current-password">Senha Atual</Label>
+              <Input id="current-password" type="password" autoComplete="current-password" {...passwordForm.register('currentPassword')} />
               {passwordForm.formState.errors.currentPassword && (
                 <p className="text-sm text-destructive">{passwordForm.formState.errors.currentPassword.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label>Nova Senha</Label>
-              <Input type="password" {...passwordForm.register('newPassword')} />
+              <Label htmlFor="new-password">Nova Senha</Label>
+              <Input id="new-password" type="password" autoComplete="new-password" {...passwordForm.register('newPassword')} />
               {passwordForm.formState.errors.newPassword && (
                 <p className="text-sm text-destructive">{passwordForm.formState.errors.newPassword.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label>Confirmar Nova Senha</Label>
-              <Input type="password" {...passwordForm.register('confirmNewPassword')} />
+              <Label htmlFor="confirm-new-password">Confirmar Nova Senha</Label>
+              <Input id="confirm-new-password" type="password" autoComplete="new-password" {...passwordForm.register('confirmNewPassword')} />
               {passwordForm.formState.errors.confirmNewPassword && (
                 <p className="text-sm text-destructive">{passwordForm.formState.errors.confirmNewPassword.message}</p>
               )}

@@ -202,8 +202,9 @@ export default function AdminProductsPage() {
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Nome do produto */}
               <div className="space-y-2 md:col-span-2">
-                <Label>Nome *</Label>
+                <Label htmlFor="product-name">Nome *</Label>
                 <Input
+                  id="product-name"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -212,8 +213,9 @@ export default function AdminProductsPage() {
 
               {/* Descrição */}
               <div className="space-y-2 md:col-span-2">
-                <Label>Descrição *</Label>
+                <Label htmlFor="product-description">Descrição *</Label>
                 <textarea
+                  id="product-description"
                   required
                   rows={3}
                   value={formData.description}
@@ -224,8 +226,9 @@ export default function AdminProductsPage() {
 
               {/* Preço de venda */}
               <div className="space-y-2">
-                <Label>Preço de Venda (R$) *</Label>
+                <Label htmlFor="product-price">Preço de Venda (R$) *</Label>
                 <Input
+                  id="product-price"
                   type="number"
                   step="0.01"
                   min="0.01"
@@ -237,8 +240,9 @@ export default function AdminProductsPage() {
 
               {/* Preço original (para desconto) */}
               <div className="space-y-2">
-                <Label>Preço Original (R$)</Label>
+                <Label htmlFor="product-original-price">Preço Original (R$)</Label>
                 <Input
+                  id="product-original-price"
                   type="number"
                   step="0.01"
                   min="0"
@@ -249,8 +253,9 @@ export default function AdminProductsPage() {
 
               {/* Estoque */}
               <div className="space-y-2">
-                <Label>Estoque *</Label>
+                <Label htmlFor="product-stock">Estoque *</Label>
                 <Input
+                  id="product-stock"
                   type="number"
                   min="0"
                   required
@@ -261,8 +266,9 @@ export default function AdminProductsPage() {
 
               {/* SKU */}
               <div className="space-y-2">
-                <Label>SKU</Label>
+                <Label htmlFor="product-sku">SKU</Label>
                 <Input
+                  id="product-sku"
                   value={formData.sku}
                   onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
                 />
@@ -270,8 +276,9 @@ export default function AdminProductsPage() {
 
               {/* Categoria */}
               <div className="space-y-2">
-                <Label>Categoria</Label>
+                <Label htmlFor="product-category">Categoria</Label>
                 <select
+                  id="product-category"
                   value={formData.categoryId}
                   onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                   className="w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm"
@@ -285,8 +292,9 @@ export default function AdminProductsPage() {
 
               {/* Upload de Imagem */}
               <div className="space-y-2 md:col-span-2">
-                <Label>Imagem do Produto</Label>
+                <Label htmlFor="product-image">Imagem do Produto</Label>
                 <Input
+                  id="product-image"
                   type="file"
                   accept="image/*"
                   onChange={(e) => setImageFile(e.target.files?.[0] || null)}
@@ -350,6 +358,10 @@ export default function AdminProductsPage() {
                 <div key={i} className="h-12 bg-muted rounded animate-pulse" />
               ))}
             </div>
+          ) : products.length === 0 ? (
+            <p className="text-center text-muted-foreground py-10">
+              {search ? 'Nenhum produto encontrado para essa busca.' : 'Nenhum produto cadastrado ainda.'}
+            </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -388,8 +400,8 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="p-3 text-center">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${product.isActive
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                          : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                           }`}>
                           {product.isActive ? 'Ativo' : 'Inativo'}
                         </span>
@@ -401,6 +413,7 @@ export default function AdminProductsPage() {
                             size="icon"
                             className="h-8 w-8"
                             onClick={() => openEditForm(product)}
+                            aria-label={`Editar ${product.name}`}
                           >
                             <Pencil className="h-3 w-3" />
                           </Button>
@@ -409,6 +422,7 @@ export default function AdminProductsPage() {
                             size="icon"
                             className="h-8 w-8 text-destructive hover:text-destructive"
                             onClick={() => handleDelete(product)}
+                            aria-label={`Remover ${product.name}`}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>

@@ -4,15 +4,15 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Package } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Package, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { ordersService } from '@/services/api';
 import { formatCurrency, formatDateTime, getOrderStatusInfo } from '@/lib/utils';
 import { Order } from '@/types';
 
 export default function OrdersPage() {
   // Busca os pedidos do usuário autenticado
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['my-orders'],
     queryFn: () => ordersService.getMyOrders(),
     select: (res) => res.data.data,
@@ -30,6 +30,13 @@ export default function OrdersPage() {
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="h-24 rounded-lg border bg-muted animate-pulse" />
           ))}
+        </div>
+      ) : isError ? (
+        // Estado de erro com opção de tentar novamente
+        <div className="text-center py-16 space-y-4">
+          <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground/40" />
+          <p className="text-muted-foreground">Não foi possível carregar seus pedidos.</p>
+          <Button variant="outline" onClick={() => refetch()}>Tentar novamente</Button>
         </div>
       ) : orders.length > 0 ? (
         // Lista de pedidos
@@ -77,12 +84,12 @@ export default function OrdersPage() {
         </div>
       ) : (
         // Estado vazio
-        <div className="text-center py-16">
-          <Package className="h-16 w-16 mx-auto text-muted-foreground/40 mb-4" />
+        <div className="text-center py-16 space-y-4">
+          <Package className="h-16 w-16 mx-auto text-muted-foreground/40" />
           <p className="text-muted-foreground">Você ainda não fez nenhum pedido.</p>
-          <Link href="/products" className="mt-4 inline-block text-primary hover:underline">
-            Explorar produtos
-          </Link>
+          <Button asChild>
+            <Link href="/products">Explorar produtos</Link>
+          </Button>
         </div>
       )}
     </div>

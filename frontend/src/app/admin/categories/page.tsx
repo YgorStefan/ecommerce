@@ -233,8 +233,8 @@ export default function AdminCategoriesPage() {
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                             category.isActive
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                              : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                           }`}
                         >
                           {category.isActive ? 'Ativa' : 'Inativa'}
@@ -247,6 +247,7 @@ export default function AdminCategoriesPage() {
                             size="icon"
                             className="h-8 w-8"
                             onClick={() => openEditForm(category)}
+                            aria-label={`Editar ${category.name}`}
                           >
                             <Pencil className="h-3 w-3" />
                           </Button>
@@ -259,6 +260,7 @@ export default function AdminCategoriesPage() {
                                 deleteMutation.mutate(category.id);
                               }
                             }}
+                            aria-label={`Remover ${category.name}`}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>

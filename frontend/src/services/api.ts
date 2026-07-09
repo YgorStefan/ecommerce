@@ -21,32 +21,28 @@ api.interceptors.request.use(
 );
 
 
-// Interceptor de resposta — trata erros e renova tokens expirados
+// Interceptor de resposta — trata erros e renova tokens expirados.
+// O refresh token vive inteiramente em um cookie httpOnly; o backend extrai o
+// ID do usuário do próprio token, então não há necessidade de enviar nada no corpo.
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as any;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Nunca tenta renovar o token da própria rota de login/refresh (evita loop infinito)
+    const isAuthRoute = originalRequest?.url?.includes('/auth/login') || originalRequest?.url?.includes('/auth/refresh');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
       originalRequest._retry = true;
 
       try {
-        const userId = localStorage.getItem('userId');
+        await axios.post(`${API_URL}/api/auth/refresh`, {}, { withCredentials: true });
 
-        // As long as we have internal user concept, attempt to hit refresh.
-        // O refreshToken real estará embutido no Cookie
-        if (userId) {
-          await axios.post(`${API_URL}/api/auth/refresh`, {
-            userId,
-          }, { withCredentials: true });
-
-          // Cookies are automatically updated, re-dispatch request!
-          return api(originalRequest);
-        }
+        // Cookies são atualizados automaticamente pelo backend — reenvia a requisição original
+        return api(originalRequest);
       } catch {
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('userId');
-          window.location.href = '/ecommerce/login';
+          window.location.href = '/login';
         }
       }
     }
@@ -69,6 +65,13 @@ export const authService = {
 
   // Realiza o logout e invalida o refresh token
   logout: () => api.post('/auth/logout'),
+
+  // Solicita o envio do e-mail de recuperação de senha
+  forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
+
+  // Redefine a senha usando o token recebido por e-mail
+  resetPassword: (token: string, newPassword: string) =>
+    api.post('/auth/reset-password', { token, newPassword }),
 };
 
 // Serviço de usuários
@@ -221,7 +224,9 @@ export const couponsService = {
 
 // Serviço de frete
 export const shippingService = {
-  // Calcula preço e prazo PAC/SEDEX (usando a API Serverless gratuita do Next.js)
-  calculate: (zipCode: string) => axios.get('/ecommerce/api/shipping/calculate', { params: { zipCode } }),
+  // Calcula preço e prazo PAC/SEDEX (usando a API Serverless gratuita do Next.js).
+  // Caminho relativo à própria origem do frontend — não usa a instância `api` porque
+  // esta rota é servida pelo próprio Next.js, não pelo backend NestJS.
+  calculate: (zipCode: string) => axios.get('/api/shipping/calculate', { params: { zipCode } }),
 };
 

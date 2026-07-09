@@ -5,7 +5,7 @@
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { SlidersHorizontal, X } from 'lucide-react';
+import { SlidersHorizontal, X, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ProductCard } from '@/components/product/product-card';
@@ -36,7 +36,7 @@ function ProductsContent() {
   });
 
   // Busca os produtos com os filtros ativos
-  const { data: productsData, isLoading } = useQuery({
+  const { data: productsData, isLoading, isError, refetch } = useQuery({
     queryKey: ['products', { search, categoryId, sortBy, page, priceRange }],
     queryFn: () =>
       productsService.getAll({
@@ -129,11 +129,12 @@ function ProductsContent() {
 
             {/* Filtro por faixa de preço */}
             <div className="space-y-2">
-              <p className="text-sm font-medium">Faixa de Preço</p>
-              <div className="flex gap-2 items-center">
+              <p className="text-sm font-medium" id="price-range-label">Faixa de Preço</p>
+              <div className="flex gap-2 items-center" role="group" aria-labelledby="price-range-label">
                 <Input
                   type="number"
                   placeholder="Mín"
+                  aria-label="Preço mínimo"
                   value={priceRange.min}
                   onChange={(e) =>
                     handleFilterChange(() =>
@@ -146,6 +147,7 @@ function ProductsContent() {
                 <Input
                   type="number"
                   placeholder="Máx"
+                  aria-label="Preço máximo"
                   value={priceRange.max}
                   onChange={(e) =>
                     handleFilterChange(() =>
@@ -176,6 +178,7 @@ function ProductsContent() {
             <select
               value={sortBy}
               onChange={(e) => handleFilterChange(() => setSortBy(e.target.value))}
+              aria-label="Ordenar por"
               className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
             >
               <option value="created_desc">Mais recentes</option>
@@ -208,6 +211,13 @@ function ProductsContent() {
                 <div key={i} className="rounded-lg border bg-muted animate-pulse aspect-[3/4]" />
               ))}
             </div>
+          ) : isError ? (
+            // Estado de erro com opção de tentar novamente
+            <div className="text-center py-16 space-y-4">
+              <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground/40" />
+              <p className="text-muted-foreground">Não foi possível carregar os produtos.</p>
+              <Button variant="outline" onClick={() => refetch()}>Tentar novamente</Button>
+            </div>
           ) : products.length > 0 ? (
             // Grade de produtos
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -217,9 +227,10 @@ function ProductsContent() {
             </div>
           ) : (
             // Estado sem resultados
-            <div className="text-center py-16">
+            <div className="text-center py-16 space-y-4">
+              <SlidersHorizontal className="h-12 w-12 mx-auto text-muted-foreground/40" />
               <p className="text-muted-foreground">Nenhum produto encontrado.</p>
-              <Button variant="outline" className="mt-4" onClick={clearFilters}>
+              <Button variant="outline" onClick={clearFilters}>
                 Limpar filtros
               </Button>
             </div>

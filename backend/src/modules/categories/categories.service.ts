@@ -9,19 +9,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import slugify from 'slugify';
 import { Category } from './entities/category.entity';
+import { Product } from '../products/entities/product.entity';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
-export class CreateCategoryDto {
-  name: string;
-  description?: string;
-  imageUrl?: string;
-}
-
-export class UpdateCategoryDto {
-  name?: string;
-  description?: string;
-  imageUrl?: string;
-  isActive?: boolean;
-}
+export { CreateCategoryDto, UpdateCategoryDto };
 
 @Injectable()
 export class CategoriesService {
@@ -29,6 +21,9 @@ export class CategoriesService {
     // Repositório TypeORM para operações na tabela categories
     @InjectRepository(Category)
     private categoriesRepository: Repository<Category>,
+    // Repositório de produtos para checar vínculos antes de remover uma categoria
+    @InjectRepository(Product)
+    private productsRepository: Repository<Product>,
   ) { }
 
   // Retorna todas as categorias ativas para exibição na loja
@@ -109,6 +104,18 @@ export class CategoriesService {
   // Remove uma categoria do banco
   async remove(id: string): Promise<void> {
     const category = await this.findOne(id);
+
+    // Impede a remoção se ainda houver produtos vinculados — evita erro de
+    // constraint no banco e perda acidental da categorização de produtos existentes
+    const productCount = await this.productsRepository.count({
+      where: { categoryId: id },
+    });
+    if (productCount > 0) {
+      throw new ConflictException(
+        `Não é possível remover: existem ${productCount} produto(s) nesta categoria`,
+      );
+    }
+
     await this.categoriesRepository.remove(category);
   }
 }

@@ -6,6 +6,18 @@ import * as nodemailer from 'nodemailer';
 import { User } from '../users/entities/user.entity';
 import { Order, OrderStatus } from '../orders/entities/order.entity';
 
+// Escapa caracteres HTML de dados fornecidos pelo usuário (ex: nome) antes de
+// interpolá-los nos templates de e-mail, evitando injeção de HTML/links maliciosos
+// em clientes de e-mail que renderizam o conteúdo
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 @Injectable()
 export class EmailService {
   // Logger para registrar erros de envio de e-mail
@@ -75,7 +87,7 @@ export class EmailService {
               <h1>Bem-vindo ao E-commerce!</h1>
             </div>
             <div class="content">
-              <p>Olá, <strong>${user.name}</strong>!</p>
+              <p>Olá, <strong>${escapeHtml(user.name)}</strong>!</p>
               <p>Sua conta foi criada com sucesso. Estamos felizes em tê-lo conosco!</p>
               <p>Agora você pode:</p>
               <ul>
@@ -106,7 +118,7 @@ export class EmailService {
       .map(
         (item) => `
         <tr>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.productName}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;">${escapeHtml(item.productName)}</td>
           <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
           <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
             R$ ${Number(item.unitPrice).toFixed(2)}
@@ -142,7 +154,7 @@ export class EmailService {
               <p>Pedido #${order.orderNumber}</p>
             </div>
             <div class="content">
-              <p>Olá, <strong>${user.name}</strong>!</p>
+              <p>Olá, <strong>${escapeHtml(user.name)}</strong>!</p>
               <p>Seu pedido foi recebido e está sendo processado.</p>
               
               <h3>Itens do Pedido</h3>
@@ -183,10 +195,10 @@ export class EmailService {
               
               <h3>Endereço de Entrega</h3>
               <p>
-                ${order.shippingAddress.name}<br>
-                ${order.shippingAddress.address}<br>
-                ${order.shippingAddress.city} - ${order.shippingAddress.state}<br>
-                CEP: ${order.shippingAddress.zipCode}
+                ${escapeHtml(order.shippingAddress.name)}<br>
+                ${escapeHtml(order.shippingAddress.address)}<br>
+                ${escapeHtml(order.shippingAddress.city)} - ${escapeHtml(order.shippingAddress.state)}<br>
+                CEP: ${escapeHtml(order.shippingAddress.zipCode)}
               </p>
             </div>
             <div class="footer">
@@ -202,6 +214,44 @@ export class EmailService {
       `Pedido Confirmado - #${order.orderNumber}`,
       html,
     );
+  }
+
+  // Envia e-mail com o link de recuperação de senha
+  async sendPasswordResetEmail(user: User, resetUrl: string): Promise<void> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #111; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+            .button { display: inline-block; background: #111; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+            .footer { text-align: center; color: #999; font-size: 12px; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Recuperação de Senha</h1>
+            </div>
+            <div class="content">
+              <p>Olá, <strong>${escapeHtml(user.name)}</strong>!</p>
+              <p>Recebemos uma solicitação para redefinir a senha da sua conta. Se foi você, clique no botão abaixo para criar uma nova senha:</p>
+              <a href="${resetUrl}" class="button">Redefinir minha senha</a>
+              <p style="margin-top: 20px; font-size: 13px; color: #666;">Este link expira em 30 minutos. Se você não solicitou a redefinição, apenas ignore este e-mail — sua senha permanecerá inalterada.</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} E-commerce. Todos os direitos reservados.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await this.sendEmail(user.email, 'Recuperação de senha', html);
   }
 
   // Envia e-mail de notificação quando o status do pedido é atualizado
@@ -239,7 +289,7 @@ export class EmailService {
               <p>#${order.orderNumber}</p>
             </div>
             <div class="content">
-              <p>Olá, <strong>${user.name}</strong>!</p>
+              <p>Olá, <strong>${escapeHtml(user.name)}</strong>!</p>
               <p>${message}</p>
               <p>Status atual: <span class="status-badge">${order.status.toUpperCase()}</span></p>
             </div>

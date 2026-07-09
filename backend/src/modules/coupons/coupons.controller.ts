@@ -16,6 +16,7 @@ import {
   CreateCouponDto,
   UpdateCouponDto,
 } from './coupons.service';
+import { ValidateCouponDto } from './dto/validate-coupon.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -31,7 +32,7 @@ export class CouponsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Validar e aplicar cupom ao carrinho' })
-  validate(@Body() body: { code: string; orderSubtotal: number }) {
+  validate(@Body() body: ValidateCouponDto) {
     return this.couponsService.validate(body.code, body.orderSubtotal);
   }
 

@@ -39,6 +39,9 @@ export class CartService {
       cart = await this.cartsRepository.save(
         this.cartsRepository.create({ userId }),
       );
+      // Um carrinho recém-criado não tem a relação "items" carregada pelo TypeORM —
+      // sem isso, o .reduce() abaixo quebraria com "Cannot read properties of undefined"
+      cart.items = [];
     }
 
     // Calcula o subtotal somando (preço × quantidade) de cada item

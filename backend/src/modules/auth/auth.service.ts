@@ -8,14 +8,18 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { randomBytes, createHash } from 'crypto';
 import { User } from '../users/entities/user.entity';
 import { Cart } from '../cart/entities/cart.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { EmailService } from '../email/email.service';
+
+// Validade do token de recuperação de senha
+const RESET_TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutos
 
 @Injectable()
 export class AuthService {
@@ -114,17 +118,28 @@ export class AuthService {
   }
 
   // Renova o access token usando um refresh token válido
-  async refreshTokens(userId: string, refreshToken: string) {
-    // Busca o usuário pelo ID
+  async refreshTokens(refreshToken: string) {
+    // Verifica a assinatura e a expiração do refresh token antes de qualquer consulta —
+    // o ID do usuário é extraído do próprio token, nunca informado pelo cliente
+    let payload: { sub: string };
+    try {
+      payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      });
+    } catch {
+      throw new UnauthorizedException('Token de renovação inválido ou expirado');
+    }
+
+    // Busca o usuário pelo ID contido no token
     const user = await this.usersRepository.findOne({
-      where: { id: userId, isActive: true },
+      where: { id: payload.sub, isActive: true },
     });
 
     if (!user || !user.refreshToken) {
       throw new UnauthorizedException('Acesso negado');
     }
 
-    // Verifica se o refresh token fornecido corresponde ao armazenado
+    // Verifica se o refresh token fornecido corresponde ao hash armazenado
     const isTokenValid = await bcrypt.compare(refreshToken, user.refreshToken);
 
     if (!isTokenValid) {
@@ -141,6 +156,59 @@ export class AuthService {
   // Remove o refresh token do banco (efetua o logout)
   async logout(userId: string) {
     await this.usersRepository.update(userId, { refreshToken: null });
+  }
+
+  // Gera um token de recuperação de senha e envia por e-mail.
+  // Sempre retorna sucesso (mesma resposta exista ou não o e-mail) para não
+  // permitir que um atacante descubra quais e-mails estão cadastrados
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.usersRepository.findOne({ where: { email, isActive: true } });
+
+    if (!user) {
+      return;
+    }
+
+    // Token aleatório enviado ao usuário; apenas seu hash é persistido
+    const rawToken = randomBytes(32).toString('hex');
+    const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+
+    await this.usersRepository.update(user.id, {
+      resetPasswordTokenHash: tokenHash,
+      resetPasswordExpires: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+    });
+
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
+    const resetUrl = `${frontendUrl}/reset-password?token=${rawToken}`;
+
+    await this.emailService.sendPasswordResetEmail(user, resetUrl).catch(() => {
+      // Ignora falhas de envio para não vazar informação sobre o estado do e-mail
+    });
+  }
+
+  // Redefine a senha usando um token válido e não expirado
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+
+    const user = await this.usersRepository.findOne({
+      where: {
+        resetPasswordTokenHash: tokenHash,
+        resetPasswordExpires: MoreThan(new Date()),
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Token inválido ou expirado');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Invalida o token de recuperação e todas as sessões ativas (refresh token)
+    await this.usersRepository.update(user.id, {
+      password: hashedPassword,
+      resetPasswordTokenHash: null,
+      resetPasswordExpires: null,
+      refreshToken: null,
+    });
   }
 
   // Método privado que gera o par de tokens JWT (access + refresh)

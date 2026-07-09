@@ -7,24 +7,27 @@
 #   - O volume anônimo (/app/node_modules) "protege" the node_modules instalado
 #     dentro do container de ser sobrescrito pelo host (que provavelmente tem
 #     uma versão diferente compilada para Windows/Mac vs Linux Alpine)
+#
+# Banco de dados: MySQL (o backend usa TypeORM com driver mysql2 — ver backend/src/app.module.ts)
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: ecommerce_postgres_dev
+  mysql:
+    image: mysql:8.0
+    container_name: ecommerce_mysql_dev
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER:-ecommerce}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-ecommerce123}
-      POSTGRES_DB: ${DB_NAME:-ecommerce_db}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-ecommerce123}
+      MYSQL_DATABASE: ${DB_NAME:-ecommerce_db}
+      MYSQL_USER: ${DB_USER:-ecommerce}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-ecommerce123}
     ports:
-      # Usa 5434 no host para evitar conflito com PostgreSQL instalado localmente no Windows
-      # (que normalmente já ocupa a porta 5432). Internamente o container continua usando 5432.
-      - '5434:5432'
+      # Usa 3307 no host para evitar conflito com MySQL instalado localmente no Windows
+      # (que normalmente já ocupa a porta 3306). Internamente o container continua usando 3306.
+      - '3307:3306'
     volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
+      - mysql_data_dev:/var/lib/mysql
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-ecommerce} -d ${DB_NAME:-ecommerce_db}']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p${DB_PASSWORD:-ecommerce123}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -42,10 +45,11 @@ services:
     environment:
       # Garante que o NestJS rode em modo dev dentro do container
       - NODE_ENV=development
+      - DB_HOST=mysql
     ports:
       - '${BACKEND_PORT:-3001}:3001'
     depends_on:
-      postgres:
+      mysql:
         condition: service_healthy
     volumes:
       # Monta o código fonte do host para hot-reload
@@ -83,5 +87,5 @@ services:
     command: npm run dev
 
 volumes:
-  postgres_data_dev:
+  mysql_data_dev:
     driver: local

@@ -9,6 +9,10 @@ interface CartState {
   cart: Cart | null;        // Dados do carrinho ou null se vazio
   isOpen: boolean;          // Controla se o drawer do carrinho está aberto
   isLoading: boolean;       // Indica operação em andamento
+  // Indica se ao menos uma tentativa de buscar o carrinho já foi concluída.
+  // Guardas de rota (ex.: checkout) usam isso para não redirecionar antes de
+  // saber se o carrinho realmente está vazio
+  hasFetched: boolean;
 
   // Ações disponíveis
   fetchCart: () => Promise<void>;
@@ -25,14 +29,16 @@ export const useCartStore = create<CartState>((set, get) => ({
   cart: null,
   isOpen: false,
   isLoading: false,
+  hasFetched: false,
 
   // Busca o carrinho do servidor e atualiza o estado
   fetchCart: async () => {
     try {
       const response = await cartService.getCart();
-      set({ cart: response.data.data });
+      set({ cart: response.data.data, hasFetched: true });
     } catch {
       // Silencia o erro se o usuário não está logado
+      set({ hasFetched: true });
     }
   },
 
@@ -41,7 +47,7 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await cartService.addItem(productId, quantity);
-      set({ cart: response.data.data, isLoading: false, isOpen: true });
+      set({ cart: response.data.data, isLoading: false, isOpen: true, hasFetched: true });
     } catch (error) {
       set({ isLoading: false });
       throw error;

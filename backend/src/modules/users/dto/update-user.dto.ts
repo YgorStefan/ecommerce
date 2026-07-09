@@ -7,6 +7,7 @@ import {
   MinLength,
   MaxLength,
   IsEnum,
+  IsBoolean,
 } from 'class-validator';
 import { UserRole } from '../entities/user.entity';
 
@@ -61,5 +62,6 @@ export class AdminUpdateUserDto extends UpdateUserDto {
   // Status ativo/inativo — apenas admin pode alterar
   @ApiProperty({ required: false })
   @IsOptional()
+  @IsBoolean()
   isActive?: boolean;
 }

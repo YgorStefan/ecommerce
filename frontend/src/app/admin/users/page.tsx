@@ -69,6 +69,8 @@ export default function AdminUsersPage() {
                 <div key={i} className="h-12 bg-muted rounded animate-pulse" />
               ))}
             </div>
+          ) : users.length === 0 ? (
+            <p className="text-center text-muted-foreground py-10">Nenhum usuário cadastrado ainda.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -89,23 +91,23 @@ export default function AdminUsersPage() {
                       <td className="p-3 text-muted-foreground">{user.email}</td>
                       <td className="p-3 text-center">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${user.role === 'admin'
-                            ? 'bg-purple-100 text-purple-800'
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                           }`}>
                           {user.role === 'admin' ? 'Admin' : 'Cliente'}
                         </span>
                       </td>
                       <td className="p-3 text-center">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${user.isActive
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                           }`}>
                           {user.isActive ? 'Ativo' : 'Inativo'}
                         </span>
                       </td>
                       <td className="p-3 text-muted-foreground">{formatDate(user.createdAt)}</td>
                       <td className="p-3">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
                           {/* Botão para alternar papel */}
                           <Button
                             variant="outline"

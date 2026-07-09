@@ -14,6 +14,8 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CartService } from './cart.service';
+import { AddCartItemDto } from './dto/add-cart-item.dto';
+import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
@@ -37,7 +39,7 @@ export class CartController {
   @ApiOperation({ summary: 'Adicionar item ao carrinho' })
   addItem(
     @CurrentUser() user: User,
-    @Body() body: { productId: string; quantity: number },
+    @Body() body: AddCartItemDto,
   ) {
     return this.cartService.addItem(user.id, body.productId, body.quantity);
   }
@@ -48,7 +50,7 @@ export class CartController {
   updateItem(
     @CurrentUser() user: User,
     @Param('itemId') itemId: string,
-    @Body() body: { quantity: number },
+    @Body() body: UpdateCartItemDto,
   ) {
     return this.cartService.updateItem(user.id, itemId, body.quantity);
   }

@@ -20,6 +20,7 @@ import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { CouponsModule } from './modules/coupons/coupons.module';
 import { EmailModule } from './modules/email/email.module';
 import { ShippingModule } from './modules/shipping/shipping.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
   imports: [
@@ -30,12 +31,15 @@ import { ShippingModule } from './modules/shipping/shipping.module';
     }),
 
     // ThrottlerModule: proteção contra ataques de força-bruta (Rate Limiting)
+    // Desativado em ambiente de teste (e2e) para não derrubar suítes que fazem
+    // múltiplas chamadas seguidas às mesmas rotas (ex.: vários cadastros de usuário)
     ThrottlerModule.forRoot([{
       ttl: 60000,
       limit: 100, // Limita a 100 requisições por minuto por IP
+      skipIf: () => process.env.NODE_ENV === 'test',
     }]),
 
-    // TypeOrmModule: configura a conexão com o banco de dados PostgreSQL
+    // TypeOrmModule: configura a conexão com o banco de dados MySQL
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -72,6 +76,7 @@ import { ShippingModule } from './modules/shipping/shipping.module';
     CouponsModule,
     EmailModule,
     ShippingModule,
+    PaymentsModule,
   ],
   providers: [
     {

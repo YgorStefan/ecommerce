@@ -7,6 +7,7 @@ import { CartService } from '../cart/cart.service';
 import { CouponsService } from '../coupons/coupons.service';
 import { ProductsService } from '../products/products.service';
 import { EmailService } from '../email/email.service';
+import { StripeService } from '../payments/stripe.service';
 import { DataSource } from 'typeorm';
 import { BadRequestException } from '@nestjs/common';
 import { PaymentMethod } from './entities/order.entity';
@@ -23,6 +24,8 @@ describe('OrdersService', () => {
     manager: {
       find: jest.fn(),
       save: jest.fn(),
+      delete: jest.fn(),
+      count: jest.fn().mockResolvedValue(0),
     },
   };
 
@@ -30,12 +33,19 @@ describe('OrdersService', () => {
     createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
   };
 
-  const mockOrderRepo = { create: jest.fn(), save: jest.fn(), findAndCount: jest.fn() };
+  const mockOrderRepo = { create: jest.fn(), save: jest.fn(), findAndCount: jest.fn(), update: jest.fn() };
   const mockOrderItemRepo = { create: jest.fn(), save: jest.fn() };
   const mockCartService = { getCart: jest.fn(), clearCart: jest.fn() };
-  const mockCouponsService = { validate: jest.fn(), calculateDiscount: jest.fn(), incrementUsage: jest.fn() };
+  const mockCouponsService = {
+    validate: jest.fn(),
+    calculateDiscount: jest.fn(),
+    incrementUsageIfAllowed: jest.fn().mockResolvedValue(true),
+  };
   const mockProductsService = { updateStock: jest.fn() };
   const mockEmailService = { sendOrderConfirmation: jest.fn().mockResolvedValue(true) };
+  const mockStripeService = {
+    createPaymentIntent: jest.fn().mockResolvedValue({ id: 'pi_1', client_secret: 'secret_1' }),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -47,6 +57,7 @@ describe('OrdersService', () => {
         { provide: CouponsService, useValue: mockCouponsService },
         { provide: ProductsService, useValue: mockProductsService },
         { provide: EmailService, useValue: mockEmailService },
+        { provide: StripeService, useValue: mockStripeService },
         { provide: DataSource, useValue: mockDataSource },
       ],
     }).compile();
@@ -91,7 +102,10 @@ describe('OrdersService', () => {
     expect(mockQueryRunner.manager.save).toHaveBeenCalled();
     expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
     expect(mockQueryRunner.release).toHaveBeenCalled();
-    expect(result.id).toBe('o1');
+    expect(result.order.id).toBe('o1');
+    // Cartão deve criar um PaymentIntent no Stripe e retornar o client_secret
+    expect(mockStripeService.createPaymentIntent).toHaveBeenCalled();
+    expect(result.clientSecret).toBe('secret_1');
   });
 
   it('create() should throw an error and rollback if stock is missing', async () => {

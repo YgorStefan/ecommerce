@@ -23,11 +23,13 @@ function MetricCard({
   value,
   description,
   icon: Icon,
+  isLoading,
 }: {
   title: string;
   value: string | number;
   description?: string;
   icon: React.ElementType;
+  isLoading?: boolean;
 }) {
   return (
     <Card>
@@ -35,8 +37,12 @@ function MetricCard({
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
-            {description && (
+            {isLoading ? (
+              <div className="h-7 w-16 bg-muted rounded animate-pulse" />
+            ) : (
+              <p className="text-2xl font-bold">{value}</p>
+            )}
+            {description && !isLoading && (
               <p className="text-xs text-muted-foreground">{description}</p>
             )}
           </div>
@@ -51,31 +57,32 @@ function MetricCard({
 
 export default function AdminDashboardPage() {
   // Busca as estatísticas de vendas do endpoint dedicado
-  const { data: salesStats } = useQuery({
+  const { data: salesStats, isLoading: isLoadingSales } = useQuery({
     queryKey: ['admin-sales-stats'],
     queryFn: () => ordersService.getStats(),
     select: (res) => res.data.data as { totalRevenue: number; totalOrders: number; monthlyRevenue: number },
   });
 
-  const { data: ordersData } = useQuery({
+  const { data: ordersData, isLoading: isLoadingOrders, isError: isOrdersError } = useQuery({
     queryKey: ['admin-orders-recent'],
     queryFn: () => ordersService.getAll({ page: 1, limit: 10 }),
     select: (res) => res.data.data,
   });
 
-  const { data: usersStats } = useQuery({
+  const { data: usersStats, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['admin-users-stats'],
     queryFn: () => usersService.getAll({ page: 1, limit: 1 }),
     select: (res) => res.data.data,
   });
 
-  const { data: productsData } = useQuery({
+  const { data: productsData, isLoading: isLoadingProducts } = useQuery({
     queryKey: ['admin-products-stats'],
     queryFn: () => productsService.getAll({ page: 1, limit: 1 }),
     select: (res) => res.data.data,
   });
 
-  // Dados simulados de vendas para o gráfico (em produção viria da API)
+  // NOTA: dados ilustrativos — ainda não existe um endpoint de série histórica de
+  // vendas por mês na API. Ver seção "Limitações conhecidas" no README.
   const chartData = [
     { month: 'Jan', vendas: 4200 },
     { month: 'Fev', vendas: 5800 },
@@ -100,6 +107,7 @@ export default function AdminDashboardPage() {
           value={ordersData?.total || 0}
           description="Todos os pedidos"
           icon={ShoppingBag}
+          isLoading={isLoadingOrders}
         />
         {/* Total de usuários */}
         <MetricCard
@@ -107,6 +115,7 @@ export default function AdminDashboardPage() {
           value={usersStats?.total || 0}
           description="Contas ativas"
           icon={Users}
+          isLoading={isLoadingUsers}
         />
         {/* Total de produtos */}
         <MetricCard
@@ -114,13 +123,15 @@ export default function AdminDashboardPage() {
           value={productsData?.total || 0}
           description="No catálogo"
           icon={Package}
+          isLoading={isLoadingProducts}
         />
         {/* Receita total obtida do endpoint de estatísticas */}
         <MetricCard
           title="Receita Total"
           value={salesStats ? formatCurrency(salesStats.totalRevenue) : 'R$ 0,00'}
-          description={salesStats ? `R$ ${formatCurrency(salesStats.monthlyRevenue)} nos últimos 30 dias` : 'Carregando...'}
+          description={salesStats ? `R$ ${formatCurrency(salesStats.monthlyRevenue)} nos últimos 30 dias` : undefined}
           icon={DollarSign}
+          isLoading={isLoadingSales}
         />
       </div>
 
@@ -128,6 +139,7 @@ export default function AdminDashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle>Vendas por Mês</CardTitle>
+          <p className="text-xs text-muted-foreground">Dados ilustrativos — série histórica ainda não disponível na API</p>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
@@ -159,7 +171,15 @@ export default function AdminDashboardPage() {
           <CardTitle>Pedidos Recentes</CardTitle>
         </CardHeader>
         <CardContent>
-          {ordersData?.orders?.length > 0 ? (
+          {isLoadingOrders ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-10 bg-muted rounded animate-pulse" />
+              ))}
+            </div>
+          ) : isOrdersError ? (
+            <p className="text-destructive text-sm">Não foi possível carregar os pedidos recentes.</p>
+          ) : ordersData?.orders?.length > 0 ? (
             <div className="space-y-3">
               {ordersData.orders.slice(0, 5).map((order: any) => (
                 <div

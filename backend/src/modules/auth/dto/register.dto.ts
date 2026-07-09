@@ -28,13 +28,13 @@ export class RegisterDto {
   @IsEmail({}, { message: 'E-mail inválido' })
   email: string;
 
-  // Senha — obrigatória, mínimo 6 caracteres
+  // Senha — obrigatória, mínimo 8 caracteres
   @ApiProperty({
-    example: 'senha123',
-    description: 'Senha (mínimo 6 caracteres)',
+    example: 'senhaForte123',
+    description: 'Senha (mínimo 8 caracteres)',
   })
   @IsString({ message: 'Senha deve ser uma string' })
-  @MinLength(6, { message: 'Senha deve ter pelo menos 6 caracteres' })
+  @MinLength(8, { message: 'Senha deve ter pelo menos 8 caracteres' })
   @MaxLength(100, { message: 'Senha deve ter no máximo 100 caracteres' })
   password: string;
 

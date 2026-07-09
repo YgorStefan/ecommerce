@@ -90,7 +90,11 @@ export class UsersService {
 
     // Gera o hash da nova senha
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await this.usersRepository.update(userId, { password: hashedPassword });
+    // Invalida o refresh token para forçar novo login em outras sessões
+    await this.usersRepository.update(userId, {
+      password: hashedPassword,
+      refreshToken: null,
+    });
   }
 
   // Atualização administrativa de usuário (pode alterar role e status)

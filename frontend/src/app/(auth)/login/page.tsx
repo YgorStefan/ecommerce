@@ -91,7 +91,12 @@ export default function LoginPage() {
 
           {/* Campo de senha com toggle de visibilidade */}
           <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Senha</Label>
+              <Link href="/forgot-password" className="text-xs text-muted-foreground hover:text-primary hover:underline">
+                Esqueceu a senha?
+              </Link>
+            </div>
             <div className="relative">
               <Input
                 id="password"
@@ -103,6 +108,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

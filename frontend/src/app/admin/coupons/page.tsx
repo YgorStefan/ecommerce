@@ -338,8 +338,8 @@ export default function AdminCouponsPage() {
                       </td>
                       <td className="p-3 text-center">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${coupon.isActive
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                           }`}>
                           {coupon.isActive ? 'Ativo' : 'Inativo'}
                         </span>
@@ -351,6 +351,7 @@ export default function AdminCouponsPage() {
                             size="icon"
                             className="h-8 w-8"
                             onClick={() => openEditForm(coupon)}
+                            aria-label={`Editar cupom ${coupon.code}`}
                           >
                             <Pencil className="h-3 w-3" />
                           </Button>
@@ -363,6 +364,7 @@ export default function AdminCouponsPage() {
                                 deleteMutation.mutate(coupon.id);
                               }
                             }}
+                            aria-label={`Remover cupom ${coupon.code}`}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>

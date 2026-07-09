@@ -1,18 +1,22 @@
 // Ponto de entrada da aplicação NestJS
 // Configura o servidor HTTP, validação global, Swagger e CORS
 
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
+import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 async function bootstrap() {
-  // Cria a instância da aplicação NestJS
-  const app = await NestFactory.create(AppModule);
+  // Cria a instância da aplicação NestJS. `rawBody: true` mantém o corpo bruto da
+  // requisição disponível em `req.rawBody`, necessário para validar a assinatura
+  // HMAC dos webhooks do Stripe (POST /api/payments/webhook)
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
   // Obtém o serviço de configuração para ler variáveis de ambiente
   const configService = app.get(ConfigService);
@@ -34,8 +38,20 @@ async function bootstrap() {
     credentials: true, // Permite o envio de cookies e headers de autenticação
   });
 
-  // Registra o interceptor global que padroniza o formato de todas as respostas
-  app.useGlobalInterceptors(new TransformInterceptor());
+  // Registra o filtro global de exceções (loga erros sem vazar dados sensíveis)
+  app.useGlobalFilters(new AllExceptionsFilter());
+
+  // Registra os interceptors globais:
+  // - ClassSerializerInterceptor remove campos com @Exclude() (senha, refreshToken) de QUALQUER
+  //   entidade retornada, incluindo quando aninhada dentro do TransformInterceptor.
+  // - TransformInterceptor padroniza o formato das respostas de sucesso.
+  // A ordem importa: como o Reflector é passado explicitamente, o ClassSerializerInterceptor
+  // processa o resultado já envolvido pelo TransformInterceptor.
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new ClassSerializerInterceptor(app.get(Reflector)),
+    new TransformInterceptor(),
+  );
 
   // Configura o pipe de validação global para todos os DTOs
   app.useGlobalPipes(
@@ -60,8 +76,12 @@ async function bootstrap() {
   // Cria o documento Swagger a partir da configuração
   const document = SwaggerModule.createDocument(app, swaggerConfig);
 
-  // Disponibiliza a documentação na rota /api/docs
-  SwaggerModule.setup('api/docs', app, document);
+  // Disponibiliza a documentação apenas fora de produção, para não expor a superfície
+  // completa da API publicamente
+  const isProduction = configService.get<string>('NODE_ENV') === 'production';
+  if (!isProduction) {
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   // Obtém a porta do servidor das variáveis de ambiente
   const port = configService.get<number>('BACKEND_PORT', 3001);
@@ -69,8 +89,11 @@ async function bootstrap() {
   // Inicia o servidor na porta configurada
   await app.listen(port);
 
-  console.log(`🚀 Backend rodando em: http://localhost:${port}/api`);
-  console.log(`📚 Swagger disponível em: http://localhost:${port}/api/docs`);
+  const logger = new Logger('Bootstrap');
+  logger.log(`Backend rodando em: http://localhost:${port}/api`);
+  if (!isProduction) {
+    logger.log(`Swagger disponível em: http://localhost:${port}/api/docs`);
+  }
 }
 
 // Executa a função de inicialização

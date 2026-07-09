@@ -11,12 +11,10 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import {
-  CategoriesService,
-  CreateCategoryDto,
-  UpdateCategoryDto,
-} from './categories.service';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { CategoriesService } from './categories.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -30,8 +28,11 @@ export class CategoriesController {
   // GET /api/categories — lista categorias
   @Get()
   @ApiOperation({ summary: 'Listar categorias' })
-  findAll(@Query('includeInactive') includeInactive?: boolean) {
-    return this.categoriesService.findAll(includeInactive);
+  @ApiQuery({ name: 'includeInactive', required: false, type: Boolean })
+  findAll(@Query('includeInactive') includeInactive?: string) {
+    // Query params chegam sempre como string — comparação explícita evita que
+    // qualquer valor truthy (ex: "false") libere categorias inativas publicamente
+    return this.categoriesService.findAll(includeInactive === 'true');
   }
 
   // GET /api/categories/:id — detalhe de categoria

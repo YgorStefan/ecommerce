@@ -5,7 +5,7 @@
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle, Package, ArrowRight } from 'lucide-react';
+import { CheckCircle, Package, ArrowRight, Mail, Clock, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // Componente interno que usa useSearchParams — deve ser envolvido em Suspense
@@ -26,10 +26,15 @@ function SuccessContent() {
       {/* Título de confirmação */}
       <div className="space-y-2">
         <h1 className="text-3xl font-bold">Pedido Confirmado!</h1>
-        {orderNumber && (
+        {orderNumber ? (
           <p className="text-muted-foreground">
             Número do pedido:{' '}
             <span className="font-mono font-semibold text-foreground">{orderNumber}</span>
+          </p>
+        ) : (
+          <p className="text-muted-foreground">
+            Não encontramos o número do pedido nesta página, mas não se preocupe — você pode
+            consultá-lo a qualquer momento em &quot;Meus Pedidos&quot;.
           </p>
         )}
       </div>
@@ -47,9 +52,18 @@ function SuccessContent() {
           Próximos Passos
         </h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          <li>✓ E-mail de confirmação enviado</li>
-          <li>⏳ Pedido sendo processado</li>
-          <li>📦 Você será notificado quando for enviado</li>
+          <li className="flex items-center gap-2">
+            <Mail className="h-4 w-4 shrink-0" />
+            E-mail de confirmação enviado
+          </li>
+          <li className="flex items-center gap-2">
+            <Clock className="h-4 w-4 shrink-0" />
+            Pedido sendo processado
+          </li>
+          <li className="flex items-center gap-2">
+            <Truck className="h-4 w-4 shrink-0" />
+            Você será notificado quando for enviado
+          </li>
         </ul>
       </div>
 

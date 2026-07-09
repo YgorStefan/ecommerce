@@ -9,6 +9,8 @@ import {
   Param,
   Query,
   UseGuards,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrderStatus } from './entities/order.entity';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -43,7 +46,10 @@ export class OrdersController {
   @Get('me')
   @ApiOperation({ summary: 'Listar meus pedidos' })
   @ApiQuery({ name: 'page', required: false })
-  findMyOrders(@CurrentUser() user: User, @Query('page') page?: number) {
+  findMyOrders(
+    @CurrentUser() user: User,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  ) {
     return this.ordersService.findMyOrders(user.id, page);
   }
 
@@ -70,7 +76,10 @@ export class OrdersController {
   @ApiOperation({ summary: '[Admin] Listar todos os pedidos' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'status', enum: OrderStatus, required: false })
-  findAll(@Query('page') page?: number, @Query('status') status?: OrderStatus) {
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('status') status?: OrderStatus,
+  ) {
     return this.ordersService.findAll(page, 20, status);
   }
 
@@ -88,7 +97,7 @@ export class OrdersController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: '[Admin] Atualizar status do pedido' })
-  updateStatus(@Param('id') id: string, @Body() body: { status: OrderStatus }) {
+  updateStatus(@Param('id') id: string, @Body() body: UpdateOrderStatusDto) {
     return this.ordersService.updateStatus(id, body.status);
   }
 }

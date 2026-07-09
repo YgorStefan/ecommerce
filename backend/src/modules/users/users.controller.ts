@@ -10,6 +10,8 @@ import {
   UseGuards,
   Query,
   Post,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,6 +21,7 @@ import {
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UpdateUserDto, AdminUpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -55,7 +58,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Alterar senha do usuário' })
   changePassword(
     @CurrentUser() user: User,
-    @Body() body: { currentPassword: string; newPassword: string },
+    @Body() body: ChangePasswordDto,
   ) {
     return this.usersService.changePassword(
       user.id,
@@ -71,7 +74,10 @@ export class UsersController {
   @ApiOperation({ summary: '[Admin] Listar todos os usuários' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
-  findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
+  ) {
     return this.usersService.findAll(page, limit);
   }
 

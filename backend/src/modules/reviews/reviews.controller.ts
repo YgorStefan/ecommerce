@@ -9,12 +9,13 @@ import {
   Param,
   UseGuards,
   Query,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ReviewsService, CreateReviewDto } from './reviews.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User, UserRole } from '../users/entities/user.entity';
 
@@ -28,7 +29,7 @@ export class ReviewsController {
   @ApiOperation({ summary: 'Listar avaliações de um produto' })
   findByProduct(
     @Param('productId') productId: string,
-    @Query('page') page?: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
   ) {
     return this.reviewsService.findByProduct(productId, page);
   }
@@ -45,6 +46,7 @@ export class ReviewsController {
   // POST /api/reviews — cria uma avaliação
   @Post()
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Criar avaliação de produto' })
   create(@CurrentUser() user: User, @Body() createReviewDto: CreateReviewDto) {

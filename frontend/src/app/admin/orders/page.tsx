@@ -27,7 +27,7 @@ export default function AdminOrdersPage() {
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   // Busca os pedidos com filtro de status
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['admin-orders', page, statusFilter],
     queryFn: () =>
       ordersService.getAll({
@@ -87,6 +87,11 @@ export default function AdminOrdersPage() {
                 <div key={i} className="h-16 bg-muted rounded animate-pulse" />
               ))}
             </div>
+          ) : isError ? (
+            <div className="text-center py-8 space-y-3">
+              <p className="text-muted-foreground">Não foi possível carregar os pedidos.</p>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>Tentar novamente</Button>
+            </div>
           ) : orders.length > 0 ? (
             <div className="space-y-2">
               {orders.map((order) => {
@@ -98,25 +103,25 @@ export default function AdminOrdersPage() {
                   <div key={order.id} className="border rounded-lg overflow-hidden">
                     {/* Linha principal do pedido */}
                     <div
-                      className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 cursor-pointer hover:bg-muted/50"
                       onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
                     >
-                      <div className="flex items-center gap-4">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 min-w-0">
                         <div>
                           <p className="font-mono font-semibold text-sm">{order.orderNumber}</p>
                           <p className="text-xs text-muted-foreground">
                             {formatDateTime(order.createdAt)}
                           </p>
                         </div>
-                        <div>
-                          <p className="text-sm">{(order.user as any)?.email}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm truncate max-w-[200px]">{(order.user as any)?.email}</p>
                           <p className="text-xs text-muted-foreground">
                             {order.items?.length || 0} itens
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-between sm:justify-end gap-4">
                         {/* Badge de status */}
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
                           {statusInfo.label}
@@ -177,7 +182,7 @@ export default function AdminOrdersPage() {
 
                         {/* Botões de atualização de status */}
                         {nextStatuses.length > 0 && (
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap gap-2">
                             {nextStatuses.map(({ value, label }) => (
                               <Button
                                 key={value}

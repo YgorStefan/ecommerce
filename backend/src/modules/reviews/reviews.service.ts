@@ -14,6 +14,16 @@ import { CreateReviewDto } from './dto/create-review.dto';
 
 export { CreateReviewDto };
 
+// A relação Review.user é "eager" e traz a entidade User completa (endereço, telefone,
+// e-mail). Como avaliações são expostas publicamente, expomos apenas os campos
+// necessários para exibição do autor, nunca dados de contato/pessoais.
+export function toPublicReview(review: Review): Review {
+  if (review.user) {
+    review.user = { id: review.user.id, name: review.user.name } as typeof review.user;
+  }
+  return review;
+}
+
 @Injectable()
 export class ReviewsService {
   constructor(
@@ -74,7 +84,12 @@ export class ReviewsService {
       take: limit,
     });
 
-    return { reviews, total, page, lastPage: Math.ceil(total / limit) };
+    return {
+      reviews: reviews.map(toPublicReview),
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
   }
 
   // Lista as avaliações do usuário logado

@@ -11,7 +11,9 @@ import slugify from 'slugify';
 import { Product } from './entities/product.entity';
 import { ProductImage } from './entities/product-image.entity';
 import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto, ProductSortBy } from './dto/query-product.dto';
+import { toPublicReview } from '../reviews/reviews.service';
 
 @Injectable()
 export class ProductsService {
@@ -124,6 +126,12 @@ export class ProductsService {
       throw new NotFoundException('Produto não encontrado');
     }
 
+    // As avaliações trazem o autor completo (relação eager) — expomos só id/nome
+    // publicamente para não vazar e-mail, telefone e endereço dos avaliadores
+    if (product.reviews) {
+      product.reviews = product.reviews.map(toPublicReview);
+    }
+
     return product;
   }
 
@@ -170,21 +178,21 @@ export class ProductsService {
   // Atualiza um produto existente
   async update(
     id: string,
-    updateDto: Partial<CreateProductDto>,
+    updateDto: UpdateProductDto,
   ): Promise<Product> {
     const product = await this.findOne(id);
 
     // Se o nome foi atualizado, regenera o slug
+    let slug: string | undefined;
     if (updateDto.name && updateDto.name !== product.name) {
-      const newSlug = slugify(updateDto.name, {
+      slug = slugify(updateDto.name, {
         lower: true,
         strict: true,
         locale: 'pt',
       });
-      (updateDto as any).slug = newSlug;
     }
 
-    Object.assign(product, updateDto);
+    Object.assign(product, updateDto, slug ? { slug } : {});
     return this.productsRepository.save(product);
   }
 

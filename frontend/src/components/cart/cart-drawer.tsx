@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { useCartStore } from '@/store/cart.store';
 import { shippingService } from '@/services/api';
 import { formatCurrency } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export function CartDrawer() {
   // Obtém o estado e ações do carrinho do store global
@@ -23,9 +24,12 @@ export function CartDrawer() {
     setIsCalculating(true);
     try {
       const res = await shippingService.calculate(zipCode);
-      setShippingResult(res.data || []);
+      // A rota retorna { data: [...] } — usar res.data direto sempre resultava em
+      // um objeto (não um array), fazendo o frete nunca aparecer
+      setShippingResult(res.data?.data || []);
     } catch {
       setShippingResult([]);
+      toast.error('Não foi possível calcular o frete para este CEP.');
     } finally {
       setIsCalculating(false);
     }
@@ -56,7 +60,7 @@ export function CartDrawer() {
               </span>
             ) : null}
           </h2>
-          <Button variant="ghost" size="icon" onClick={closeCart}>
+          <Button variant="ghost" size="icon" onClick={closeCart} aria-label="Fechar carrinho">
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -109,6 +113,7 @@ export function CartDrawer() {
                         className="h-7 w-7"
                         onClick={() => updateItem(item.id, item.quantity - 1)}
                         disabled={isLoading}
+                        aria-label={`Diminuir quantidade de ${item.product.name}`}
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
@@ -119,6 +124,7 @@ export function CartDrawer() {
                         className="h-7 w-7"
                         onClick={() => updateItem(item.id, item.quantity + 1)}
                         disabled={isLoading || item.quantity >= item.product.stock}
+                        aria-label={`Aumentar quantidade de ${item.product.name}`}
                       >
                         <Plus className="h-3 w-3" />
                       </Button>
@@ -136,6 +142,7 @@ export function CartDrawer() {
                       className="h-7 w-7 text-destructive hover:text-destructive"
                       onClick={() => removeItem(item.id)}
                       disabled={isLoading}
+                      aria-label={`Remover ${item.product.name} do carrinho`}
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>

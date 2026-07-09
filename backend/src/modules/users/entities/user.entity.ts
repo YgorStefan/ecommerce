@@ -83,6 +83,17 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   refreshToken: string | null;
 
+  // Hash (SHA-256) do token de recuperação de senha — nunca armazenamos o token em
+  // texto puro, apenas seu hash, assim como o e-mail nunca revela se existe ou não
+  @Exclude()
+  @Column({ type: 'varchar', nullable: true })
+  resetPasswordTokenHash: string | null;
+
+  // Data de expiração do token de recuperação de senha (validade curta)
+  @Exclude()
+  @Column({ type: 'datetime', nullable: true })
+  resetPasswordExpires: Date | null;
+
   // Data e hora de criação — preenchida automaticamente pelo TypeORM
   @ApiProperty({ description: 'Data de criação da conta' })
   @CreateDateColumn()

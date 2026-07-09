@@ -35,13 +35,19 @@ Thumbs.db
 backend/uploads/
 
 # Docker volumes locais
-postgres_data/
+mysql_data/
 
 # TypeScript
 *.tsbuildinfo
 
 # Cache
 .eslintcache
+
+# Testes E2E (Playwright) e de carga (k6)
+frontend/playwright-report/
+frontend/test-results/
+frontend/e2e/.seed.json
+backend/test/load/results/
 
 # next-sitemap SEO gerados no build
 frontend/public/robots.txt

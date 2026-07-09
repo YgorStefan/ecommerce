@@ -106,13 +106,13 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
 
-          {/* Botão de favoritar — visível apenas ao passar o mouse */}
+          {/* Botão de favoritar — visível ao passar o mouse; sempre visível em telas touch, que não têm hover */}
           <Button
             variant="secondary"
             size="icon"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+            className="absolute top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity h-8 w-8"
             onClick={handleAddToWishlist}
-            aria-label="Adicionar à lista de desejos"
+            aria-label={`Adicionar ${product.name} à lista de desejos`}
           >
             <Heart className="h-4 w-4" />
           </Button>

@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { WishlistService } from './wishlist.service';
+import { AddWishlistItemDto } from './dto/add-wishlist-item.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
@@ -32,7 +33,7 @@ export class WishlistController {
   // POST /api/wishlist — adiciona produto à wishlist
   @Post()
   @ApiOperation({ summary: 'Adicionar produto à lista de desejos' })
-  addItem(@CurrentUser() user: User, @Body() body: { productId: string }) {
+  addItem(@CurrentUser() user: User, @Body() body: AddWishlistItemDto) {
     return this.wishlistService.addItem(user.id, body.productId);
   }
 

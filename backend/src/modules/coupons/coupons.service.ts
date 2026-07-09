@@ -6,7 +6,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Coupon, DiscountType } from './entities/coupon.entity';
 import { CreateCouponDto, UpdateCouponDto } from './dto/create-coupon.dto';
 
@@ -104,9 +104,28 @@ export class CouponsService {
     return Math.round(discount * 100) / 100;
   }
 
-  // Incrementa o contador de uso do cupom após um pedido ser criado
-  async incrementUsage(id: string): Promise<void> {
-    await this.couponsRepository.increment({ id }, 'usageCount', 1);
+  // Incrementa o contador de uso do cupom de forma atômica, apenas se o limite ainda
+  // não tiver sido atingido — evita a corrida em que dois pedidos simultâneos
+  // ultrapassam o usageLimit entre a validação e o incremento.
+  // Aceita um EntityManager opcional para participar da transação do pedido.
+  async incrementUsageIfAllowed(
+    id: string,
+    manager?: EntityManager,
+  ): Promise<boolean> {
+    const repo = manager
+      ? manager.getRepository(Coupon)
+      : this.couponsRepository;
+
+    // Usa crase (`) para nomes de coluna — sintaxe do MySQL (driver mysql2)
+    const result = await repo
+      .createQueryBuilder()
+      .update(Coupon)
+      .set({ usageCount: () => '`usageCount` + 1' })
+      .where('id = :id', { id })
+      .andWhere('(`usageLimit` IS NULL OR `usageCount` < `usageLimit`)')
+      .execute();
+
+    return (result.affected ?? 0) > 0;
   }
 
   // Atualiza um cupom existente

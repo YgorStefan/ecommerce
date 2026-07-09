@@ -11,6 +11,7 @@ import {
   Min,
   Max,
   Length,
+  ValidateIf,
 } from 'class-validator';
 import { DiscountType } from '../entities/coupon.entity';
 
@@ -44,6 +45,9 @@ export class CreateCouponDto {
   @ApiProperty({ example: 10, description: 'Valor do desconto (% ou R$)' })
   @IsNumber()
   @Min(0.01)
+  // Um cupom percentual não pode ultrapassar 100% de desconto
+  @ValidateIf((dto) => dto.discountType === DiscountType.PERCENTAGE)
+  @Max(100, { message: 'Desconto percentual não pode ser maior que 100' })
   discountValue: number;
 
   @ApiProperty({
@@ -125,6 +129,8 @@ export class UpdateCouponDto {
   @IsOptional()
   @IsNumber()
   @Min(0.01)
+  @ValidateIf((dto) => dto.discountType === DiscountType.PERCENTAGE)
+  @Max(100, { message: 'Desconto percentual não pode ser maior que 100' })
   discountValue?: number;
 
   @ApiProperty({ required: false })

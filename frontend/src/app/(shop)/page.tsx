@@ -159,15 +159,13 @@ export default function HomePage() {
       {/*  PRODUTOS EM DESTAQUE  */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
-          <div className="relative flex items-center justify-center mb-8">
-            <h2 className="text-3xl font-bold text-center">Destaques</h2>
-            <div className="absolute right-0">
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/products?featured=true">
-                  Ver todos <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-3 mb-8">
+            <h2 className="text-3xl font-bold text-center sm:text-left">Destaques</h2>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/products?featured=true">
+                Ver todos <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
 
           <Suspense fallback={<FeaturedProductsSkeleton />}>

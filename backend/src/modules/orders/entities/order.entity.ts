@@ -85,6 +85,12 @@ export class Order {
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
   paymentStatus: PaymentStatus;
 
+  // ID do PaymentIntent no Stripe — usado para correlacionar o webhook ao pedido
+  // (apenas preenchido para pagamentos com cartão, processados via Stripe)
+  @ApiProperty({ description: 'ID do PaymentIntent no Stripe', required: false })
+  @Column({ nullable: true, length: 100 })
+  paymentIntentId: string;
+
   // Subtotal do pedido antes de descontos
   @ApiProperty({ description: 'Subtotal do pedido' })
   @Column({ type: 'decimal', precision: 10, scale: 2 })

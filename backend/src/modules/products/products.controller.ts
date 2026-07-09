@@ -26,6 +26,7 @@ import {
 } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -69,7 +70,7 @@ export class ProductsController {
   @ApiOperation({ summary: '[Admin] Atualizar produto' })
   update(
     @Param('id') id: string,
-    @Body() updateProductDto: Partial<CreateProductDto>,
+    @Body() updateProductDto: UpdateProductDto,
   ) {
     return this.productsService.update(id, updateProductDto);
   }
@@ -94,6 +95,8 @@ export class ProductsController {
   @ApiOperation({ summary: '[Admin] Fazer upload de imagens do produto' })
   @UseInterceptors(
     FilesInterceptor('images', 10, {
+      // Limita o tamanho de cada arquivo para evitar abuso/DoS via upload
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB por imagem
       // Configura o armazenamento dos arquivos no disco
       storage: diskStorage({
         destination: './uploads/products', // Pasta de destino

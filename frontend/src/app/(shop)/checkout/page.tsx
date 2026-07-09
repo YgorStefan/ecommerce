@@ -1,4 +1,4 @@
-// Página de checkout — formulário de endereço, resumo do pedido e pagamento mock
+// Página de checkout — formulário de endereço, resumo do pedido e pagamento real via Stripe
 
 'use client';
 
@@ -7,8 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useQuery } from '@tanstack/react-query';
-import { Tag, CheckCircle, CreditCard } from 'lucide-react';
+import { Tag, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,8 +18,10 @@ import { ordersService, couponsService } from '@/services/api';
 import { formatCurrency } from '@/lib/utils';
 import { Coupon } from '@/types';
 import { toast } from 'sonner';
+import { StripePaymentForm } from '@/components/checkout/stripe-payment-form';
 
-// Schema de validação do formulário de checkout
+// Schema de validação do formulário de checkout — dados de cartão não fazem mais
+// parte deste formulário, são coletados diretamente pelo Stripe Elements
 const checkoutSchema = z.object({
   name: z.string().min(2, 'Nome é obrigatório'),
   address: z.string().min(5, 'Endereço é obrigatório'),
@@ -28,24 +29,28 @@ const checkoutSchema = z.object({
   state: z.string().min(2, 'Estado é obrigatório'),
   zipCode: z.string().min(8, 'CEP inválido'),
   phone: z.string().min(10, 'Telefone é obrigatório'),
-  paymentMethod: z.enum(['credit_card', 'debit_card', 'pix', 'boleto']),
-  cardNumber: z.string().optional(),
-  cardName: z.string().optional(),
-  cardExpiry: z.string().optional(),
-  cardCvv: z.string().optional(),
+  paymentMethod: z.enum(['credit_card', 'pix', 'boleto']),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
+// Etapa "payment" só existe para pagamentos com cartão, quando aguardamos a
+// confirmação do PaymentIntent via Stripe Elements
+interface PendingCardPayment {
+  clientSecret: string;
+  orderNumber: string;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, clearCart } = useCartStore();
-  const { user, isAuthenticated } = useAuthStore();
+  const { cart, clearCart, hasFetched: cartFetched } = useCartStore();
+  const { user, isAuthenticated, hasHydrated } = useAuthStore();
 
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [pendingCardPayment, setPendingCardPayment] = useState<PendingCardPayment | null>(null);
 
   const {
     register,
@@ -71,18 +76,29 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
+    // Aguarda a hidratação do estado de autenticação antes de qualquer decisão,
+    // para não redirecionar um usuário válido logo após um refresh de página
+    if (!hasHydrated) return;
+
     if (!isAuthenticated) {
       router.push('/login');
-    } else if (!cart || cart.items.length === 0) {
+    } else if (!pendingCardPayment && cartFetched && (!cart || cart.items.length === 0)) {
+      // Só redireciona por carrinho vazio depois que o carrinho foi realmente
+      // buscado. Não redireciona enquanto o pagamento com cartão está pendente —
+      // o carrinho já foi esvaziado no backend assim que o pedido foi criado
       router.push('/products');
     }
-  }, [isAuthenticated, cart, router]);
+  }, [hasHydrated, isAuthenticated, cart, cartFetched, pendingCardPayment, router]);
 
-  if (!isAuthenticated || !cart || cart.items.length === 0) {
+  // Enquanto o estado ainda não hidratou/carregou, não decide nada (evita flash)
+  if (!hasHydrated || !isAuthenticated) {
+    return null;
+  }
+  if (!pendingCardPayment && cartFetched && (!cart || cart.items.length === 0)) {
     return null;
   }
 
-  const subtotal = cart.subtotal;
+  const subtotal = cart?.subtotal ?? 0;
   const shippingCost = subtotal > 200 ? 0 : 19.9;
   const total = subtotal - discountAmount + shippingCost;
 
@@ -119,11 +135,6 @@ export default function CheckoutPage() {
 
   const onSubmit = async (data: CheckoutFormData) => {
     try {
-      if (data.paymentMethod === 'credit_card' && (!data.cardNumber || !data.cardExpiry || !data.cardCvv)) {
-        toast.error("Preencha os dados do cartão para continuar.");
-        return;
-      }
-
       const response = await ordersService.create({
         paymentMethod: data.paymentMethod,
         shippingAddress: {
@@ -137,13 +148,58 @@ export default function CheckoutPage() {
         couponCode: appliedCoupon?.code,
       });
 
-      const order = response.data.data;
+      const { order, clientSecret } = response.data.data;
+
+      // O backend já esvaziou o carrinho na mesma transação que criou o pedido —
+      // sincroniza o estado local para refletir isso
       await clearCart();
+
+      if (data.paymentMethod === 'credit_card' && clientSecret) {
+        // Cartão: aguarda a confirmação do pagamento via Stripe Elements antes
+        // de considerar o checkout concluído
+        setPendingCardPayment({ clientSecret, orderNumber: order.orderNumber });
+        return;
+      }
+
+      // PIX/boleto seguem o fluxo simulado já existente
       router.push(`/checkout/success?orderNumber=${order.orderNumber}`);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Erro ao finalizar o pedido');
     }
   };
+
+  // Etapa de confirmação do pagamento com cartão
+  if (pendingCardPayment) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-lg">
+        <button
+          onClick={() => setPendingCardPayment(null)}
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar
+        </button>
+        <Card>
+          <CardHeader>
+            <CardTitle>Pagamento com Cartão</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4 flex justify-between text-sm border-b pb-4">
+              <span className="text-muted-foreground">Pedido {pendingCardPayment.orderNumber}</span>
+              <span className="font-semibold">{formatCurrency(total)}</span>
+            </div>
+            <StripePaymentForm
+              clientSecret={pendingCardPayment.clientSecret}
+              submitLabel={`Pagar ${formatCurrency(total)}`}
+              onSuccess={() =>
+                router.push(`/checkout/success?orderNumber=${pendingCardPayment.orderNumber}`)
+              }
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -171,20 +227,24 @@ export default function CheckoutPage() {
                   <div className="space-y-2">
                     <Label htmlFor="city">Cidade</Label>
                     <Input id="city" {...register('city')} />
+                    {errors.city && <p className="text-sm text-destructive">{errors.city.message}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="state">Estado</Label>
                     <Input id="state" placeholder="SP" maxLength={2} {...register('state')} />
+                    {errors.state && <p className="text-sm text-destructive">{errors.state.message}</p>}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="zipCode">CEP</Label>
                     <Input id="zipCode" placeholder="00000-000" {...register('zipCode')} />
+                    {errors.zipCode && <p className="text-sm text-destructive">{errors.zipCode.message}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Telefone</Label>
                     <Input id="phone" placeholder="(11) 99999-9999" {...register('phone')} />
+                    {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
                   </div>
                 </div>
               </CardContent>
@@ -195,9 +255,9 @@ export default function CheckoutPage() {
                 <CardTitle>Método de Pagamento</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
-                    { value: 'credit_card', label: 'Cartão de Crédito', description: 'Até 12x' },
+                    { value: 'credit_card', label: 'Cartão de Crédito', description: 'Via Stripe' },
                     { value: 'pix', label: 'PIX', description: '5% desconto' },
                     { value: 'boleto', label: 'Boleto', description: 'Vence em 3 dias' },
                   ].map((option) => (
@@ -219,42 +279,20 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
-                {/* Checkout Transparente - Campos Mock do Cartão */}
                 {selectedPaymentMethod === 'credit_card' && (
-                  <div className="mt-4 p-4 border rounded-lg bg-muted/30 space-y-4 animate-in fade-in slide-in-from-top-2">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CreditCard className="h-5 w-5 text-primary" />
-                      <h4 className="font-medium">Dados do Cartão (Checkout Transparente)</h4>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cardNumber">Número do Cartão</Label>
-                      <Input id="cardNumber" placeholder="0000 0000 0000 0000" {...register('cardNumber')} maxLength={19} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cardName">Nome no Cartão</Label>
-                      <Input id="cardName" placeholder="NOME DO TITULAR" {...register('cardName')} className="uppercase" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="cardExpiry">Validade</Label>
-                        <Input id="cardExpiry" placeholder="MM/AA" {...register('cardExpiry')} maxLength={5} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="cardCvv">CVV</Label>
-                        <Input id="cardCvv" placeholder="123" {...register('cardCvv')} maxLength={4} type="password" />
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground pt-1 text-center">
-                      💳 Este é um ambiente seguro simulado.
-                    </p>
-                  </div>
+                  <p className="text-xs text-muted-foreground pt-1 text-center">
+                    Você informará os dados do cartão na próxima etapa, em um ambiente seguro fornecido pela Stripe.
+                  </p>
                 )}
-
               </CardContent>
             </Card>
 
             <Button type="submit" size="lg" className="w-full hidden lg:flex" disabled={isSubmitting}>
-              {isSubmitting ? 'Processando...' : `Finalizar Pedido — ${formatCurrency(total)}`}
+              {isSubmitting
+                ? 'Processando...'
+                : selectedPaymentMethod === 'credit_card'
+                  ? 'Continuar para Pagamento'
+                  : `Finalizar Pedido — ${formatCurrency(total)}`}
             </Button>
           </form>
         </div>
@@ -268,7 +306,7 @@ export default function CheckoutPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {/* Itens do carrinho */}
-              {cart.items.map((item) => (
+              {cart?.items.map((item) => (
                 <div key={item.id} className="flex justify-between items-center text-sm">
                   <span className="flex-1 truncate mr-2">
                     {item.product.name} × {item.quantity}
@@ -325,6 +363,7 @@ export default function CheckoutPage() {
                   </div>
                   <button
                     onClick={handleRemoveCoupon}
+                    aria-label="Remover cupom aplicado"
                     className="text-xs text-muted-foreground hover:text-destructive"
                   >
                     Remover
@@ -360,7 +399,11 @@ export default function CheckoutPage() {
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Processando...' : `Finalizar — ${formatCurrency(total)}`}
+            {isSubmitting
+              ? 'Processando...'
+              : selectedPaymentMethod === 'credit_card'
+                ? 'Continuar para Pagamento'
+                : `Finalizar — ${formatCurrency(total)}`}
           </Button>
         </div>
       </div>

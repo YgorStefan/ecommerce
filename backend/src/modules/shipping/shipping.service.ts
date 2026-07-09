@@ -1,14 +1,17 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { calcularPrecoPrazo } from 'correios-brasil';
 
 @Injectable()
 export class ShippingService {
+  constructor(private configService: ConfigService) { }
+
   async calculate(zipCode: string) {
     try {
       const cleanZip = zipCode.replace(/\D/g, '');
 
       const args = {
-        sCepOrigem: '01001000', // CEP Origem Padrão
+        sCepOrigem: this.configService.get<string>('SHIPPING_ORIGIN_ZIP', '01001000'),
         sCepDestino: cleanZip,
         nVlPeso: '1',
         nCdFormato: '1', // 1 para caixa

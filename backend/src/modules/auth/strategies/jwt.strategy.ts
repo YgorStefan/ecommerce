@@ -23,11 +23,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     private usersRepository: Repository<User>,
   ) {
     super({
-      // Extrai o JWT dos cookies
+      // Extrai o JWT do cookie httpOnly (fluxo normal do browser) ou, como alternativa,
+      // do header "Authorization: Bearer" (útil para testar via Swagger/Postman)
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: any) => {
-          return request?.cookies?.accessToken;
-        },
+        (request: any) => request?.cookies?.accessToken,
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       // Rejeita automaticamente tokens expirados
       ignoreExpiration: false,

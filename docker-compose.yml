@@ -1,24 +1,30 @@
 # docker-compose.yml
 # Orquestra todos os serviços da aplicação: banco de dados, backend e frontend
 # Modo: PRODUÇÃO — usa as imagens buildadas pelo Dockerfile multi-stage
+#
+# Banco de dados: MySQL (o backend usa TypeORM com driver mysql2 — ver backend/src/app.module.ts)
+# Observação: em produção real (Railway) o banco costuma ser provisionado como serviço
+# gerenciado à parte, com DB_HOST/DB_PORT apontando para ele — o serviço "mysql" abaixo
+# é útil para rodar a stack completa localmente via `docker compose up`.
 
 services:
-  # Serviço do banco de dados PostgreSQL
-  postgres:
-    image: postgres:16-alpine
-    container_name: ecommerce_postgres
+  # Serviço do banco de dados MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: ecommerce_mysql
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER:-ecommerce}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-ecommerce123}
-      POSTGRES_DB: ${DB_NAME:-ecommerce_db}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-ecommerce123}
+      MYSQL_DATABASE: ${DB_NAME:-ecommerce_db}
+      MYSQL_USER: ${DB_USER:-ecommerce}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-ecommerce123}
     ports:
-      - '5433:5432'
+      - '3308:3306'
     volumes:
       # Persiste os dados do banco entre reinicializações do container
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-ecommerce} -d ${DB_NAME:-ecommerce_db}']
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p${DB_PASSWORD:-ecommerce123}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,10 +47,12 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      - DB_HOST=mysql
     ports:
       - '${BACKEND_PORT:-3001}:3001'
     depends_on:
-      postgres:
+      mysql:
         condition: service_healthy
 
   # Serviço do frontend Next.js
@@ -72,5 +80,5 @@ services:
 
 # Volumes nomeados para persistência de dados
 volumes:
-  postgres_data:
+  mysql_data:
     driver: local
